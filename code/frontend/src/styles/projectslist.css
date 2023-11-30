@@ -1,0 +1,36 @@
+.container{
+
+    margin-left: 10px;
+    padding: 10px;
+}
+.projects-list{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-left: 20px;
+    margin-left: 10px;
+    margin-top: 20px;
+
+}
+.card{
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    width: 100%;
+    margin-bottom: 15px;
+    border: solid black 1px;
+    padding: 20px;
+}
+strong{
+    font-weight: 500;
+}
+
+.buttons{
+    display: flex;
+    flex-direction: column;
+    margin: 10px;
+}
+.btn{
+    margin: 5px;
+    min-width: 135px;
+}
