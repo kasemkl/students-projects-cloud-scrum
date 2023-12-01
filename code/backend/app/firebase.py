@@ -24,3 +24,20 @@ def getData(collection_name):
     data=db.reference(collection_name)
     return data.get()
     
+def postData(collection_name,data):
+        ref=db.reference(collection_name)
+        # Use push() to generate a unique key for the new suggestion
+        new_project_key = ref.push().key
+        # Save the data to Firebase using the unique key
+        ref.child(new_project_key).set(data)
+        return data
+def deleteData(collection_name,key):
+    ref=db.reference(collection_name)
+    if ref.child(key).get():
+      ref.child(key).delete()
+      return 'delete {key} from {collection_name} success'
+    else :
+      return '{key} not found in {collection_name}'
+def getSingleRow(collection_name,key):
+  ref=db.reference(collection_name)
+  return ref.child(key).get()

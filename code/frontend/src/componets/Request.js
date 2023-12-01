@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import useAxios from '../utils/useAxios';
 import AuthContext from '../context/AuthContext';
 import '../styles/addSugg.css'
+import Loading from '../componets/Loading'
 const RequestForm = () => {
     const navigate = useNavigate(); // Initialize the useHistory hook
     const api=useAxios()
@@ -15,9 +16,14 @@ const RequestForm = () => {
     title: '',
     description: '',
     goal: '',
-    department: '1',
+    department: '',
   });
-
+  const [touchedFields, setTouchedFields] = useState({
+    title: false,
+    description: false,
+    goal: false,
+    department: false,
+  });
   const [departments, setDepartments] = useState([]);
 
   useEffect(() => {
@@ -26,8 +32,14 @@ const RequestForm = () => {
       try {
           const response = await api.get('/departments/');
           if (response.status === 200) {
-              console.log('departments', response.data);
-              setDepartments(response.data);
+              // console.log('departments', response.data);
+              const rawData=response.data
+      const dataArray = Object.keys(rawData).map(key => ({
+        id: key,
+        ...rawData[key],
+      }));
+        setDepartments(dataArray)
+        console.log(departments)
           }
       } catch (error) {
           console.error('Error fetching requests:', error);
@@ -37,13 +49,15 @@ const RequestForm = () => {
   }, []);
 
   const handleChange = (e) => {
-    if (e.target.name === 'department') {
-      setFormData({ ...formData, [e.target.name]: parseInt(e.target.value) });
-    } else {
       setFormData({ ...formData, [e.target.name]: e.target.value });
-    }
+    
   };
-
+  const handleBlur = (field) => {
+    setTouchedFields((prevTouched) => ({ ...prevTouched, [field]: true }));
+  };
+  const isValid = () => {
+    return Object.keys(formData).every((field) => formData[field] !== '');
+  };
   const handleSubmit = async(e) => {
     // Make a POST request to the Django API endpoint
     e.preventDefault(); // Prevent the default form submission behavior
@@ -58,8 +72,11 @@ const RequestForm = () => {
         title: '',
         description: '',
         goal: '',
-        department: '1',
-    })}
+        department: '',
+    })
+  alert('request is send ')
+  navigate('/sugg-list')
+  }
       catch (error) {
           // Handle errors
           console.error('Error updating request:', error);
@@ -67,43 +84,83 @@ const RequestForm = () => {
   };
 
   return (
-    <div className='request'>
-
-    <form onSubmit={handleSubmit}>
-      <fieldset>
-        <div className='field'>
-          <label>Title:</label>
-          <input type="text" name="title" value={formData.title} onChange={handleChange} />
-        </div>
-        <div className='field'>
-          <label>Description:</label>
-          <textarea name="description" value={formData.description} onChange={handleChange} />
-        </div>
-        <div className='field'>
-          <label>Goal:</label>
-          <input type="text" name="goal" value={formData.goal} onChange={handleChange} />
-        </div>
-        <div className='field'>
-          <label>Department:</label>
-          {departments.map(department => (
-            <div key={department.id}>
-              <input
-                type="radio"
-                id={`department-${department.id}`}
-                name="department"
-                value={department.id}
-                defaultChecked={department.id === 1} 
-                onChange={handleChange}
+    <div className='container request'>
+    <div className={departments.length==0 ?'content-container':''}>
+      {departments.length >0 ? (
+        <form onSubmit={handleSubmit}>
+        <fieldset>
+          <div className='field'>
+            <label>Title:</label>
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              onBlur={() => handleBlur('title')}
+            />
+            {touchedFields.title && formData.title === '' && (
+              <span className="FieldError">Title is required</span>
+            )}
+          </div>
+  
+          <div className='field'>
+            <label>Description:</label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              onBlur={() => handleBlur('description')}
+            />
+            {touchedFields.description && formData.description === '' && (
+              <span className="FieldError">Description is required</span>
+            )}
+          </div>
+  
+          <div className='field'>
+            <label>Goal:</label>
+            <input
+              type="text"
+              name="goal"
+              value={formData.goal}
+              onChange={handleChange}
+              onBlur={() => handleBlur('goal')}
+            />
+            {touchedFields.goal && formData.goal === '' && (
+              <span className="FieldError">Goal is required</span>
+            )}
+          </div>
+  
+          <div className='field'>
+            <label>Department:</label>
+            {departments.map((department) => (
+              <div key={department.id}>
+                <input
+                  type="radio"
+                  id={`department-${department.id}`}
+                  name="department"
+                  value={department.name}
+                  onChange={handleChange}
+                  onBlur={() => handleBlur('department')}
                 />
-              <label htmlFor={`department-${department.id}`}>{department.name}</label>
-            </div>
-          ))}
+                <label htmlFor={`department-${department.id}`}>{department.name}</label>
+              </div>
+            ))}
+            {touchedFields.department && formData.department === '' && (
+              <span className="FieldError">Department is required</span>
+            )}
+          </div>
+  
+          <div className='field'>
+            <button type="submit" className='btn btn-primary' disabled={!isValid()}>
+              Submit Request
+            </button>
+          </div>
+        </fieldset>
+      </form>)
+          :
+          (<Loading/>)
+        }
         </div>
-        <div className='field'>
-          <button type="submit">Submit Request</button>
-        </div>
-      </fieldset>
-    </form>
     </div>
   );
 };

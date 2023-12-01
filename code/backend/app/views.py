@@ -20,12 +20,25 @@ from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from .permissions import *
 from .firebase import *
+from .validition import *
 @api_view(['GET','POST'])
 def home(request):
     Data=getData('data')
     return Response(Data)
 
 
+
+class UserLogin(APIView):
+	permission_classes = (permissions.AllowAny,)
+	authentication_classes = (SessionAuthentication,)
+	##
+	def post(self, request):
+		data = request.data
+		serializer = UserLoginSerializer(data=data)
+		if serializer.is_valid(raise_exception=True):
+			user = serializer.check_user(data)
+			login(request, user)
+			return Response({"value":user.is_authenticated}, status=status.HTTP_200_OK)
 
 
 
@@ -51,65 +64,34 @@ class UserLogout(APIView):
 
 
 
-
-@api_view(['GET', 'POST', 'PUT', 'DELETE'])
-def SuggestProjectView(request):
-    suggestion_projects_ref = db.reference('suggestion_projects')
-
-    if request.method == 'GET':
-        suggest_projects = suggestion_projects_ref.get()
-        return Response(suggest_projects)
-
-    elif request.method == 'POST':
-        data = request.data
-
-        # Create a dictionary with the data
-        suggestion_project_data = data
-
-        # Use push() to generate a unique key for the new suggestion
-        new_project_key = suggestion_projects_ref.push().key
-
-        # Save the data to Firebase using the unique key
-        suggestion_projects_ref.child(new_project_key).set(suggestion_project_data)
-
-        return Response(suggestion_project_data)
-
-
-
 @api_view(['GET', 'POST'])
 def DepartmentView(request):
-    department_ref=db.reference('department')
+    reference='department'
     if request.method == 'GET':
-        department = Department.objects.all()
-        serializer = DepartmentSerializer(department, many=True)
-        return Response(serializer.data)
+        data = getData(reference)
+        return Response(data)
 
     elif request.method == 'POST':
-        serializer = DepartmentSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data=postData(reference,request.data)
+        return Response(data)
+
 
 @api_view(['GET', 'POST','PUT','DELETE'])
 def SuggestProjectView(request):
-    if request.method == 'GET':
-        suggestProject = SuggestionProjects.objects.all()
-        serializer = SuggestionProjectsSerializer(suggestProject, many=True)
-        return Response(serializer.data)
+        reference='suggestion_projects'
 
-    elif request.method == 'POST':
-        serializer = SuggestionProjectsSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if request.method == 'GET':
+            data = getData(reference)
+            return Response(data)
+
+        elif request.method == 'POST':
+            data=postData(reference,request.data)
+            return Response(data)
+        
 @api_view(['GET', 'POST','PUT','DELETE'])
 def DeleteSuggProject(request,id):    
         try:
-            sugg_project_id=id
-            sugg_project= SuggestionProjects.objects.get(pk=sugg_project_id)
-            sugg_project.delete()
+            deleteData('suggestion_projects',id)
             return Response({'message':'suggestion project deleted'})
         except Exception as e:
             # Convert the exception to a string for JSON serialization
@@ -118,67 +100,66 @@ def DeleteSuggProject(request,id):
         
 @api_view(['GET', 'POST'])
 def ProjectsView(request):
+    reference='projects'
+
     if request.method == 'GET':
-        projects = Project.objects.all()
-        serializer = ProjectSerializer(projects, many=True)
-        return Response(serializer.data)
+        data = getData(reference)
+        return Response(data)
 
     elif request.method == 'POST':
-        serializer = ProjectSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data=postData(reference,request.data)
+        return Response(data)
         
-@api_view([ 'POST'])
+@api_view([ 'POST','GET'])
 @permission_classes([IsSupervisor | IsManager])    
 def RequestsView(request):
-    if request.method == 'POST':
-        serializer = RequestSerializer(data=request.data)
-        # return Response(serializer.is_valid())
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    reference='requests'
+    
+    if request.method == 'GET':
+        data = getData(reference)
+        return Response(data)
 
+    elif request.method == 'POST':
+        try:
+            if validateRequestsData(request.data):
+                data=postData(reference,request.data)
+                return Response(data,status=status.HTTP_201_CREATED)
+            else:
+                return Response({'ERROR':"the request has missing fields"},status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            # Convert the exception to a string for JSON serialization
+            error_message = str(e)
+            return Response({"error": error_message})
 @api_view([ 'GET', 'PATCH'])
 @permission_classes([IsManager])
 def ManagerRequestsView(request):
-    # return Response({'auth':request.user.is_authenticated,'group':request.user.groups.filter(name='supervisor').exists()})
+    reference='requests'
     
     if request.method == 'GET':
-        requests = Requests.objects.all()
-        serializer = RequestSerializer(requests, many=True)
-        return Response(serializer.data)
+        data = getData(reference)
+        return Response(data)
 
     elif request.method == 'PATCH':
         request_id = request.data.get('id')
         decision = request.data.get('status')
 
         try:
-            request_instance = Requests.objects.get(pk=request_id)
-        except Requests.DoesNotExist:
+            request_instance = getSingleRow('requests', request_id)
+        except Exception:
             return Response({"error": "Request not found"}, status=status.HTTP_404_NOT_FOUND)
 
         try:
             if decision == 'accepted':
-                SuggReq= SuggestionProjects.objects.create(
-                    title=request_instance.title,
-                    description=request_instance.description,
-                    goal=request_instance.goal,
-                    department=request_instance.department,
-                    supervisor_id=request_instance.supervisor_id,
-                    supervisor_name=request_instance.supervisor_name
-                )
-                
-                SuggReq.save()
-                request_instance.delete()
+                if validateRequestsData(request_instance):
+                    postData('suggestion_projects', request_instance)
+                    deleteData('requests', request_id)# Corrected function name
+                else:
+                    return Response({'ERROR':"invaild data"})
             else:
-                request_instance.delete()
+                deleteData('requests', request_id)  # Corrected function name
         except Exception as e:
             # Convert the exception to a string for JSON serialization
             error_message = str(e)
             return Response({"error": error_message})
 
-        serializer = RequestSerializer(request_instance)
-        return Response(serializer.data)
+        return Response(request_instance)

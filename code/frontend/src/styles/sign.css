@@ -7,13 +7,14 @@
   }
   
   fieldset {
-    display: flex;
-    width: 480px;
-    padding: 16px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    flex-direction: column;
+    display: flex !important;
+    width: 480px !important;
+    padding: 16px !important;
+    border: 1px solid #ccc !important;
+    border-radius: 4px !important;
+    flex-direction: column !important;
   }
+  
   
   label {
     margin-bottom: 8px;
@@ -46,7 +47,7 @@
   
   .FieldError {
     position: absolute;
-    bottom: -6px;
+    bottom: 6px;
     color: red;
     font-size: 12px;
   }

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Card from './Card';
 import '../styles/projectslist.css';
 import axios from 'axios';
+import Loading from '../componets/Loading';
 
 axios.defaults.xsrfCookieName = 'csrftoken';
 axios.defaults.xsrfHeaderName = 'X-CSRFToken';
@@ -11,7 +12,7 @@ const client = axios.create({
   baseURL: "http://127.0.0.1:8000",
 });
 
-const MyComponent = () => {
+const SuggProjectsList = () => {
   const [data, setData] = useState([]);
 
   const fetchData = async () => {
@@ -19,7 +20,12 @@ const MyComponent = () => {
       const response = await axios.get('http://127.0.0.1:8000/sugg-projects/');
       const jsonData = response.data;
       console.log(jsonData);
-      setData(jsonData);
+      const rawData=response.data
+      const dataArray = Object.keys(rawData).map(key => ({
+        id: key,
+        ...rawData[key],
+      }));
+        setData(dataArray)
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -32,13 +38,20 @@ const MyComponent = () => {
   return (
     <div className='container'>
       <h1>Suggestion Projects List:</h1>
-      <div className='projects-list'>
-        {data.map((suggProject) => (
-          <Card key={suggProject.id} formData={suggProject} />
-        ))}
+      <div className={data.length==0 ?'content-container':''}>
+      {data.length > 0 ? (
+        <div className='projects-list'>
+          {data.map((suggProject) => (
+            <Card key={suggProject.id} formData={suggProject} />
+          ))}
+        </div>
+      ) : (
+        <Loading/>
+      )}
       </div>
     </div>
   );
+  
 };
 
-export default MyComponent;
+export default SuggProjectsList;

@@ -5,6 +5,7 @@ import '../styles/projectslist.css';
 import axios from 'axios';
 import CardProjects from './CardProjects';
 import useAxios from '../utils/useAxios';
+import Loading from './Loading';
 
 const ProjectsList = () => {
   const [data, setData] = useState([]);
@@ -13,7 +14,12 @@ const ProjectsList = () => {
     let response =await api.get('/projects/')
     if(response.status === 200){
       console.log('projects',response.data)
-        setData(response.data)
+      const rawData=response.data
+      const dataArray = Object.keys(rawData).map(key => ({
+        id: key,
+        ...rawData[key],
+      }));
+        setData(dataArray)
     }
   };
   
@@ -24,10 +30,16 @@ const ProjectsList = () => {
   return (
     <div className='container'>
       <h1>Projects List:</h1>
-      <div className='projects-list'>
+      <div className={data.length==0 ?'content-container':''}>
+      {data.length >0 ? (
+        <div className='projects-list'>
         {data.map((suggProject) => (
           <CardProjects key={suggProject.id} formData={suggProject} />
-        ))}
+          ))}
+          </div>)
+          :
+          (<Loading/>)
+        }
       </div>
     </div>
   );

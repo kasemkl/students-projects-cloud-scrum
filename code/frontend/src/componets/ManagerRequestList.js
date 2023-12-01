@@ -1,6 +1,7 @@
 // RequestList.jsx
 import React, { useState, useEffect } from 'react';
 import useAxios from '../utils/useAxios';
+import Loading from './Loading';
 
 const RequestList = () => {
     const [requests, setRequests] = useState([]);
@@ -10,8 +11,11 @@ const RequestList = () => {
         try {
             const response = await api.get('/manager-requests-list/');
             if (response.status === 200) {
-                console.log('requests', response.data);
-                setRequests(response.data);
+              console.log('requests', response.data);
+              const rawData=response.data
+              const dataArray = Object.keys(rawData).map(key => ({id: key,...rawData[key],
+              }));
+                  setRequests(dataArray)
             }
         } catch (error) {
             console.error('Error fetching requests:', error);
@@ -40,17 +44,30 @@ const RequestList = () => {
     };
 
     return (
-        <div>
-            <h2>Pending Requests</h2>
-            <ul>
+        <div className='container'>
+            <h2>Pending Requests :</h2>
+            {requests.length > 0 ? (
+              <div className=''>
                 {requests.map(request => (
-                    <li key={request.id}>
-                        {request.title} - {request.department.name}
-                        <button onClick={() => handleDecision(request.id, 'accepted')}>Accept</button>
-                        <button onClick={() => handleDecision(request.id, 'rejected')}>Reject</button>
-                    </li>
+                  <div key={request.id}>
+                        <div className="card" >
+                          <div className="card-body">
+                            <h3 className="card-title">{request.title}</h3>
+                            <p className="card-text"><strong>Description:</strong> {request.description}</p>
+                            <p className="card-text"><strong>goal:</strong> {request.goal}</p>
+                            <p className="card-text"><strong>department:</strong> {request.department}</p>
+                            <p className="card-text"><strong>supervisor:</strong> {request.supervisor_name}</p>
+                          </div>
+                          <div className=''>
+                            <button className='btn btn-success' onClick={() => handleDecision(request.id, 'accepted')}>Accept</button>
+                            <button className='btn btn-danger' onClick={() => handleDecision(request.id, 'rejected')}>Reject</button>
+                          </div>
+                        </div>
+                    </div>
                 ))}
-            </ul>
+            </div>):
+            (<p className='paragraph'>No pending requests</p>) 
+              }
         </div>
     );
 };

@@ -21,8 +21,8 @@
     font-size: 20px;
   }
   .navbar {
-    position: absolute;
-    right: 43px;
+    position: absolute !important;
+    right: 43px !important;
     
 }
   
