@@ -1,19 +1,13 @@
 from django.urls import path
-from . import views
-# urls.py
+from .views import *
 
 urlpatterns = [
-    path('login/', views.UserLogin.as_view(), name='custom-login'),
-    path('logout/', views.UserLogout.as_view(), name='custom-login'),
-    # path('register/', views.UserRegister.as_view(), name='register'),
-    # # path('menu/', views.UserData.as_view()),
-    path('sugg-projects/', views.SuggestProjectView),
-    path('sugg-projects/<path:id>/', views.DeleteSuggProject),
-    path('departments/', views.DepartmentView),
-    path('projects/', views.ProjectsView),
-    path('requests/', views.RequestsView),
-    path('manager-requests-list/', views.ManagerRequestsView),
-    path('home/', views.home),
-    ##path('logout/', views.LogoutView.as_view(), name='logout'),
-    # other URLs...
+    path('register/',UserRegister.as_view(),name='register'),
+    path('sugg-projects/', SuggestProjectView.as_view(), name='suggest-projects'),
+    path('sugg-projects/<path:id>/', DeleteSuggProject.as_view(), name='delete-sugg-project'),
+    path('departments/', DepartmentView.as_view(), name='departments'),
+    path('projects/', ProjectsView.as_view(), name='projects'),
+    path('requests/', RequestsView.as_view(), name='requests'),
+    path('manager-requests-list/', ManagerRequestsView.as_view(), name='manager-requests-list'),
+    path('profile/',imageView)
 ]

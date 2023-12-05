@@ -1,0 +1,14 @@
+.NavBar{
+    justify-content: flex-end;
+  }
+.navbar-brand img{
+    border-radius: 25px;
+    width: 35px;
+    height: 35px;
+}
+.navbar-brand span{
+    margin: 10px !important;
+    color: #ccc5c5;
+    font-family:Georgia, 'Times New Roman', Times, serif;
+    font-size: 23px;
+}

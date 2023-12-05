@@ -15,6 +15,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['university_id'] = user.university_id
         token['first_name'] = user.first_name
         token['groups'] = [group.name for group in user.groups.all()]
+        token['profile_photo'] = user.profile_photo.url
         # ...
 
         return token

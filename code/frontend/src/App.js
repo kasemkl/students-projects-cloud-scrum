@@ -16,8 +16,9 @@ import PrivateRoute from './utils/PrivateRoute';
 import AuthContext, { AuthProvider } from './context/AuthContext';
 import SignUp from './componets/SignUp';
 import { BrowserRouter as Router} from 'react-router-dom'
+import ImageForm from './componets/ImageForm';
 
-
+import Header from './componets/Header';
 function App() {
 
   return (
@@ -31,13 +32,15 @@ function App() {
       </Routes> */}
        <Router>
       <AuthProvider>
-        <Nav/>
+        <Header/>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/" element={<PrivateRoute element={<HomePage />} />} />
           <Route path='/sugg-list' element={<SuggProjectsList />} />
           <Route path='/manager-request-list' element={<ManagerRequestList />} />
           <Route path='/add-sugg' element={<Request />} />
+         <Route path='/sign-up' element={<SignUp />} />
+          <Route path='/image' element={<ImageForm/>} /> 
         </Routes>
       </AuthProvider>
     </Router>

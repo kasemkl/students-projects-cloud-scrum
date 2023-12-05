@@ -20,27 +20,16 @@ from django.core.exceptions import ValidationError
 UserModel = get_user_model()
 
 class UserRegisterSerializer(serializers.ModelSerializer):
-    university_id = serializers.CharField()
-    password = serializers.CharField(write_only=True)
-
     class Meta:
         model = Account
-        fields = ['university_id', 'password']
+        fields = ['university_id', 'password', 'first_name', 'last_name', 'profile_photo']
 
     def create(self, validated_data):
-        try:
-            # Set 'university_id' field before calling create_user
-            university_id = validated_data.pop('university_id')
-            
-            # Use 'create_user' method if it's a custom user model
-            user_obj = UserModel.objects.create_user(university_id=university_id, password=validated_data['password'])
-
-            # Assuming 'university' is a related field, set it using the correct relationship
-            user_obj.university_id = university_id
-            user_obj.save()
-            return user_obj
-        except Exception as e:
-            raise ValidationError({'message': str(e)})
+            try:
+                user = Account.objects.create_user(**validated_data)
+                return user
+            except Exception as e:
+                raise ValidationError({'message': str(e)})
 
 class UserSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -66,3 +55,8 @@ class USERserilizer(serializers.ModelSerializer):
     class Meta:
         model=Account
         fields=['__all__']
+        
+class ImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=image
+        fields=['photo']
