@@ -11,7 +11,7 @@ const RequestForm = () => {
     const api=useAxios()
     let {user}=useContext(AuthContext)
   const [formData, setFormData] = useState({
-    supervisor_id:user.user_id,
+    supervisor_id:user.university_id,
     supervisor_name:user.first_name,
     title: '',
     description: '',
@@ -67,7 +67,7 @@ const RequestForm = () => {
       let response=await api.post('/requests/',formData)
       console.log(response.data)
       setFormData({
-        supervisor_id:user.user_id,
+        supervisor_id:user.university_id,
         supervisor_name:user.first_name,
         title: '',
         description: '',

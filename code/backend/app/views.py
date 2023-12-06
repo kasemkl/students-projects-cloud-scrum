@@ -4,10 +4,14 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .permissions import IsManager, IsSupervisor
-from .firebase import getData, getSingleRow, postData, deleteData
+from .firebase import getData, getSingleRow, postData, deleteData,getByID
 from .validition import validateRequestsData
 from .serilizers import *  # Make sure to import your serializers
 from rest_framework.parsers import MultiPartParser, FormParser
+from datetime import datetime
+
+current_date_time = datetime.now()
+date=current_date_time.strftime('%y/%m/%d %I:%M%p')
 
 
 class UserRegister(APIView):
@@ -56,7 +60,7 @@ class DepartmentView(APIView):
         return Response(data)
 
 class SuggestProjectView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         reference = 'suggestion_projects'
@@ -80,7 +84,7 @@ class DeleteSuggProject(APIView):
             return Response({"error": error_message})
 
 class ProjectsView(APIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         reference = 'projects'
@@ -124,7 +128,7 @@ class ManagerRequestsView(APIView):
         reference = 'requests'
         request_id = request.data.get('id')
         decision = request.data.get('status')
-
+        sender=request.data.get('user_name')
         try:
             request_instance = getSingleRow('requests', request_id)
         except Exception:
@@ -134,6 +138,11 @@ class ManagerRequestsView(APIView):
             if decision == 'accepted':
                 if validateRequestsData(request_instance):
                     postData('suggestion_projects', request_instance)
+                    notification={'message':'Your suggestions is approved by the manager',
+                                'sender':sender,
+                                'receiver_id':int(request_instance['supervisor_id']),
+                                'date':date}
+                    postData('notifications',notification)
                     deleteData('requests', request_id)
                 else:
                     return Response({'ERROR': "invalid data"})
@@ -144,16 +153,10 @@ class ManagerRequestsView(APIView):
             return Response({"error": error_message})
 
         return Response(request_instance)
-@api_view(['POST'])
-def imageView(request):
-    if request.method == 'POST':
-        # Pass request.data to instantiate the serializer
-        data = ImageSerializer(data=request.data)
 
-        if data.is_valid():
-            instance = data.save()
-            return Response({'success': 'Image uploaded'})
-        else:
-            return Response({'failed': 'Something went wrong', 'errors': data.errors})
-
-    return Response({'failed': 'Invalid request method'})
+class Notifications(APIView):
+    
+    def get(self,request,id):
+        reference='notifications'
+        data=getByID(reference,id)
+        return Response(data)

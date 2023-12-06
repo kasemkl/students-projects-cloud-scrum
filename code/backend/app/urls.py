@@ -9,5 +9,6 @@ urlpatterns = [
     path('projects/', ProjectsView.as_view(), name='projects'),
     path('requests/', RequestsView.as_view(), name='requests'),
     path('manager-requests-list/', ManagerRequestsView.as_view(), name='manager-requests-list'),
-    path('profile/',imageView)
+    path('notifications/<int:id>/', Notifications.as_view(), name='notifications'),
+    # path('profile/',imageView)
 ]

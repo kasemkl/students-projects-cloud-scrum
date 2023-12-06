@@ -1,0 +1,26 @@
+.toggle{
+    width: 50px;
+    background: transparent;
+    border: none;
+}
+.dropdown-menu[data-bs-popper] {
+    top: 100%;
+    margin-top: var(--bs-dropdown-spacer);
+    right: 0 !important;
+    left: unset !important;
+}
+.dropdown-menu.show {
+    width: 400px;
+}
+
+.noti {
+    display: flex;
+    justify-content: space-between;
+}
+.msg{
+    width: 300px;
+}
+.date{
+    width:100px;
+    font-size:11px
+}

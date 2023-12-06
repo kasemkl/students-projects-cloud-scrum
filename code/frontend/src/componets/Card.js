@@ -46,7 +46,7 @@ const Card = ({ formData }) => {
       </div>
       <div className='buttons'>
         {user.groups.includes('student') && <Link to="#" className="btn btn-success">Apply</Link>}
-        {user.user_id === supervisor_id && <Link to="#" onClick={handleDeleteClick}className="btn btn-danger">Delete</Link>}
+        {user.university_id === supervisor_id && <Link to="#" onClick={handleDeleteClick}className="btn btn-danger">Delete</Link>}
       </div>
     </div>
   );

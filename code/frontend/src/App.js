@@ -17,8 +17,9 @@ import AuthContext, { AuthProvider } from './context/AuthContext';
 import SignUp from './componets/SignUp';
 import { BrowserRouter as Router} from 'react-router-dom'
 import ImageForm from './componets/ImageForm';
-
+import Notifications from './componets/Notifications';
 import Header from './componets/Header';
+import ContextualExample from './componets/ContextualExample';
 function App() {
 
   return (
@@ -41,6 +42,8 @@ function App() {
           <Route path='/add-sugg' element={<Request />} />
          <Route path='/sign-up' element={<SignUp />} />
           <Route path='/image' element={<ImageForm/>} /> 
+          <Route path='/toast' element={<Notifications/>} /> 
+          
         </Routes>
       </AuthProvider>
     </Router>

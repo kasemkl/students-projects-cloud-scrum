@@ -24,7 +24,7 @@ class AppUserManager(BaseUserManager):
         return user
 
 class Account(AbstractBaseUser, PermissionsMixin):
-    university_id = models.CharField(max_length=255, unique=True)
+    university_id = models.IntegerField(unique=True)
     password = models.CharField(max_length=255)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)

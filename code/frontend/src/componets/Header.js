@@ -6,6 +6,7 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 import '../styles/header.css'
 import AuthContext from '../context/AuthContext';
 import { useContext } from 'react';
+import Notifications from './Notifications';
 const Header = () => {
     let {user,logoutUser}=useContext(AuthContext)
   return (
@@ -29,7 +30,7 @@ const Header = () => {
             <Nav.Link href="/sugg-list">suggestion</Nav.Link>
             {user && user.groups && (user.groups.includes('manager')) && 
             <Nav.Link href="/manager-request-list">Requests</Nav.Link>}
-
+            <Notifications/>
             <NavDropdown title="Options" id="basic-nav-dropdown">
             {user && user.groups && (user.groups.includes('supervisor') || user.groups.includes('manager')) &&
             <NavDropdown.Item href="/add-sugg">Add suggestion</NavDropdown.Item>}

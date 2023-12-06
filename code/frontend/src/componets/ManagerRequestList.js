@@ -1,11 +1,14 @@
 // RequestList.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import useAxios from '../utils/useAxios';
 import Loading from './Loading';
+import AuthContext from '../context/AuthContext';
 
 const RequestList = () => {
     const [requests, setRequests] = useState([]);
     const [load, setLoad] = useState(false);
+    const {user}=useContext(AuthContext)
+    const name=user.first_name
     let api=useAxios()
     const fetchData = async () => {
         try {
@@ -26,13 +29,14 @@ const RequestList = () => {
         fetchData()
     },[load])
 
-    const handleDecision = async (requestId, decision) => {
+    const handleDecision = async (requestId, decision,name) => {
         // Make a PATCH request to update the status of the request
-        console.log({ id:requestId,status: decision })
+        console.log({ id:requestId,status: decision,user_name:name })
         try{
         let response=await api.patch('/manager-requests-list/',{
             id:requestId,
-            status:decision
+            status:decision,
+            user_name:name
         })
         console.log(response.data)
         }
@@ -59,8 +63,8 @@ const RequestList = () => {
                             <p className="card-text"><strong>supervisor:</strong> {request.supervisor_name}</p>
                           </div>
                           <div className=''>
-                            <button className='btn btn-success' onClick={() => handleDecision(request.id, 'accepted')}>Accept</button>
-                            <button className='btn btn-danger' onClick={() => handleDecision(request.id, 'rejected')}>Reject</button>
+                            <button className='btn btn-success' onClick={() => handleDecision(request.id, 'accepted',name)}>Accept</button>
+                            <button className='btn btn-danger' onClick={() => handleDecision(request.id, 'rejected',name)}>Reject</button>
                           </div>
                         </div>
                     </div>

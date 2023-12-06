@@ -20,24 +20,36 @@ firebase_admin.initialize_app(cred, options={
     'databaseURL': config['databaseURL']
 })
 
-def getData(collection_name):
-    data=db.reference(collection_name)
-    return data.get()
+def getData(reference):
+    data=db.reference(reference)
+    all_data=data.get()
+    return all_data
     
-def postData(collection_name,data):
-        ref=db.reference(collection_name)
+def postData(reference,data):
+        ref=db.reference(reference)
         # Use push() to generate a unique key for the new suggestion
         new_project_key = ref.push().key
         # Save the data to Firebase using the unique key
         ref.child(new_project_key).set(data)
         return data
-def deleteData(collection_name,key):
-    ref=db.reference(collection_name)
+      
+      
+def deleteData(reference,key):
+    ref=db.reference(reference)
     if ref.child(key).get():
       ref.child(key).delete()
-      return 'delete {key} from {collection_name} success'
+      return 'delete {key} from {reference} success'
     else :
-      return '{key} not found in {collection_name}'
-def getSingleRow(collection_name,key):
-  ref=db.reference(collection_name)
+      return '{key} not found in {reference}'
+    
+def getSingleRow(reference,key):
+  ref=db.reference(reference)
   return ref.child(key).get()
+
+def getByID(refefence,id):
+    ref=db.reference(refefence)
+    all_data=ref.get()
+    filtered_data = {
+    key: value for key, value in all_data.items() if value.get('receiver_id') == id
+}
+    return filtered_data
