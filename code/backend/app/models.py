@@ -30,17 +30,13 @@ class Account(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=255)
     type = models.CharField(max_length=255, default='student')
     profile_photo = models.ImageField(upload_to='images/', default='../media/images/default_profile_photo.jpg')
-
+    email=models.EmailField()
     USERNAME_FIELD = 'university_id'
     REQUIRED_FIELDS = ['first_name', 'last_name']
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     objects = AppUserManager()
-
+    
     def __str__(self):
         return str(self.university_id)
-
-
-class image(models.Model):
-    photo=models.ImageField(upload_to='images/',blank=True,null=True)

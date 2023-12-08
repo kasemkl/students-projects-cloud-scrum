@@ -5,6 +5,7 @@ import '../styles/projectslist.css';
 import axios from 'axios';
 import Loading from '../componets/Loading';
 import NavDropdown from 'react-bootstrap/NavDropdown';
+import useAxios from '../utils/useAxios';
 
 axios.defaults.xsrfCookieName = 'csrftoken';
 axios.defaults.xsrfHeaderName = 'X-CSRFToken';
@@ -15,6 +16,7 @@ const client = axios.create({
 
 const SuggProjectsList = () => {
   const [data, setData] = useState([]);
+  const api=useAxios()
   const [projectsBySupervisor, setProjectsBySupervisor] = useState({});
   const [selectedSupervisor, setSelectedSupervisor] = useState(null);
   const [selectedDepartment, setSelectedDepartment] = useState(null);
@@ -26,7 +28,7 @@ const SuggProjectsList = () => {
   const [projectsByDepartments,setProjectsByDepartments]=useState({})
   const fetchData = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/sugg-projects/');
+      const response = await api.get('/sugg-projects/');
       const jsonData = response.data;
       console.log(jsonData);
       const rawData=response.data
@@ -97,6 +99,12 @@ const handleFilterSupervisorChange=()=>{
   setSelectedFilterDepartment(false)
 }
 
+const handleClear=()=>{
+  setSelectedSupervisor(null)
+  setSelectedDepartment(null)
+  setSelectedFilterSupervisor(false)
+  setSelectedFilterDepartment(false)
+}
 
   const renderGroupedProjects = () => {
     if (selectedSupervisor) {
@@ -150,6 +158,17 @@ const handleFilterSupervisorChange=()=>{
       </div>
     );
   }
+  else {
+    return (
+      <div>
+            <div className='projects-list'>
+              {data.map((suggProject) => (
+                <Card key={suggProject.id} formData={suggProject} />
+              ))}
+            </div>
+          </div>
+    );
+  }
 }
   
 
@@ -158,7 +177,9 @@ const handleFilterSupervisorChange=()=>{
       <h1>Suggestion Projects List:</h1>
       {/* Add a dropdown or some UI to select the supervisor */}
       {/* For example, a select dropdown */}
-      <NavDropdown title="Options" id="basic-nav-dropdown">
+     <NavDropdown title={<span>{'Filter By '} <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-funnel" viewBox="0 0 16 16">
+  <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5v-2zm1 .5v1.308l4.372 4.858A.5.5 0 0 1 7 8.5v5.306l2-.666V8.5a.5.5 0 0 1 .128-.334L13.5 3.308V2h-11z"/>
+</svg></span>} id="basic-nav-dropdown" className='filter'>
 
         <NavDropdown.Item onClick={()=>handleFilterDepartmentChange()}>Departments</NavDropdown.Item>
         <NavDropdown.Item onClick={()=>handleFilterSupervisorChange()}>Supervisors</NavDropdown.Item>
@@ -182,10 +203,10 @@ const handleFilterSupervisorChange=()=>{
           Department: {department.name}
         </NavDropdown.Item>
       ))}
+
+<NavDropdown.Divider/>
+      <NavDropdown.Item onClick={()=>handleClear()}>clear filter </NavDropdown.Item>
     </NavDropdown>
-
-
-      
 
       <div className={data.length === 0 ? 'content-container' : ''}>
         {data.length > 0 ? (

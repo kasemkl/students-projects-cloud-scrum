@@ -9,6 +9,7 @@ from .validition import validateRequestsData
 from .serilizers import *  # Make sure to import your serializers
 from rest_framework.parsers import MultiPartParser, FormParser
 from datetime import datetime
+from django.contrib.auth.hashers import check_password
 
 current_date_time = datetime.now()
 date=current_date_time.strftime('%y/%m/%d %I:%M%p')
@@ -60,7 +61,7 @@ class DepartmentView(APIView):
         return Response(data)
 
 class SuggestProjectView(APIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         reference = 'suggestion_projects'
@@ -84,7 +85,7 @@ class DeleteSuggProject(APIView):
             return Response({"error": error_message})
 
 class ProjectsView(APIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         reference = 'projects'
@@ -155,8 +156,48 @@ class ManagerRequestsView(APIView):
         return Response(request_instance)
 
 class Notifications(APIView):
-    
+    permission_classes = [IsAuthenticated]
+
     def get(self,request,id):
         reference='notifications'
         data=getByID(reference,id)
         return Response(data)
+    
+
+class UpdateProfile(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        
+        if request.data.get('old_password') and request.data.get('new_password'):
+            old_password = request.data.get('old_password')
+            new_password = request.data.get('new_password')
+
+            if not check_password(old_password, request.user.password):
+                return Response({'error': 'Incorrect old password'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            request.user.set_password(new_password)
+            
+        if request.data.get('profile_photo'):
+            new_profile_photo = request.data.get('profile_photo')
+            request.user.profile_photo = new_profile_photo
+        
+        if request.data.get('email'):
+            new_email=request.data.get('email')
+            request.user.email=new_email
+                
+        request.user.save()
+        
+        return Response({'message': 'Profile updated successfully'}, status=status.HTTP_200_OK)
+
+
+class UserInfo(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            user = Account.objects.get(university_id=request.user.university_id)
+            serializer = UserInfoSerializer(user)
+            return Response({'profile_photo_url': serializer.data['profile_photo']})
+        except Account.DoesNotExist:
+            return Response({'message': 'User not found'}, status=404)
+        

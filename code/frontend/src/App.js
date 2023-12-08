@@ -20,6 +20,8 @@ import ImageForm from './componets/ImageForm';
 import Notifications from './componets/Notifications';
 import Header from './componets/Header';
 import ContextualExample from './componets/ContextualExample';
+import SettingsPage from './pages/SettingsPage';
+import { UserInfoProvider } from './context/UserInfoContext';
 function App() {
 
   return (
@@ -33,6 +35,7 @@ function App() {
       </Routes> */}
        <Router>
       <AuthProvider>
+        <UserInfoProvider>
         <Header/>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
@@ -43,8 +46,10 @@ function App() {
          <Route path='/sign-up' element={<SignUp />} />
           <Route path='/image' element={<ImageForm/>} /> 
           <Route path='/toast' element={<Notifications/>} /> 
+          <Route path='/settings' element={<SettingsPage/>} /> 
           
         </Routes>
+        </UserInfoProvider>
       </AuthProvider>
     </Router>
       </div>

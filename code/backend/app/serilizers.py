@@ -25,11 +25,16 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         fields = ['university_id', 'password', 'first_name', 'last_name', 'profile_photo']
 
     def create(self, validated_data):
-            try:
-                user = Account.objects.create_user(**validated_data)
-                return user
-            except Exception as e:
-                raise ValidationError({'message': str(e)})
+        try:
+            # Check if 'profile_photo' is not provided or is an empty string
+            if not validated_data.get('profile_photo', ''):
+                # Set the default profile photo filename with the user's university_id
+                validated_data['profile_photo'] = f"images/{validated_data['university_id']}.jpg"
+
+            user = Account.objects.create_user(**validated_data)
+            return user
+        except Exception as e:
+            raise ValidationError({'message': str(e)})
 
 class UserSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -55,8 +60,9 @@ class USERserilizer(serializers.ModelSerializer):
     class Meta:
         model=Account
         fields=['__all__']
-        
-class ImageSerializer(serializers.ModelSerializer):
+
+class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
-        model=image
-        fields=['photo']
+        model = Account
+        fields = ['university_id', 'profile_photo']
+        

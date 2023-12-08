@@ -17,25 +17,40 @@ const useAxios = () => {
     });
 
 
-    axiosInstance.interceptors.request.use(async req => {
-    
-        const user = jwtDecode(authTokens.access)
-        const isExpired = dayjs.unix(user.exp).diff(dayjs()) < 1;
-    
-        if(!isExpired) return req
-        console.log(authTokens.refresh)
-        const response = await axios.post(`${baseURL}/api/token/refresh/`, {
-            refresh: authTokens.refresh
-        });
-        console.log('auth',response.data)
-        localStorage.setItem('authTokens', JSON.stringify(response.data))
+    axiosInstance.interceptors.request.use(async (req) => {
+        try {
+          const user = jwtDecode(authTokens.access);
+          const isExpired = dayjs.unix(user.exp).diff(dayjs()) < 1;
+      
+          if (!isExpired) {
+            return req;
+          }
+      
+          console.log('Refreshing token:', authTokens.refresh);
+      
+          const response = await axios.post(`${baseURL}/api/token/refresh/`, {
+            refresh: authTokens.refresh,
+          });
+      
+          // Check for a successful response (status code 200)
+            const newAuthTokens = response.data;
+            setAuthTokens(newAuthTokens);
+            localStorage.setItem('authTokens', JSON.stringify(newAuthTokens));
+            setUser(jwtDecode(newAuthTokens.access));
+            
+            // Update the request header with the new access token
+            req.headers.Authorization = `Bearer ${newAuthTokens.access}`;
         
-        setAuthTokens(response.data)
-        setUser(jwtDecode(response.data.access))
-        
-        req.headers.Authorization = `Bearer ${response.data.access}`
-        return req
-    })
+            // Handle unexpected response status codes (e.g., 401)
+      
+          return req;
+        } catch (error) {
+          // Handle decoding errors or other unexpected errors
+          console.error('Error refreshing token:', error);
+          return req; // Return the original request to prevent blocking the request
+        }
+      });
+      
     
     return axiosInstance
 }

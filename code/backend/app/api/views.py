@@ -14,8 +14,11 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         # Add custom claims
         token['university_id'] = user.university_id
         token['first_name'] = user.first_name
+        token['last_name'] = user.last_name
+        token['type']=user.type
         token['groups'] = [group.name for group in user.groups.all()]
         token['profile_photo'] = user.profile_photo.url
+        token['email']=user.email
         # ...
 
         return token

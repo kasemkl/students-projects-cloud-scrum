@@ -3,13 +3,23 @@
     background: transparent;
     border: none;
 }
-.dropdown-menu[data-bs-popper] {
+.notifications >.dropdown-toggle::after {
+    display: none !important;
+    margin-left: 0.255em;
+    vertical-align: 0.255em;
+    content: "";
+    border-top: 0;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+}
+.notifications > .dropdown-menu[data-bs-popper]{
     top: 100%;
     margin-top: var(--bs-dropdown-spacer);
     right: 0 !important;
     left: unset !important;
 }
-.dropdown-menu.show {
+.notifications > .dropdown-menu.show {
     width: 400px;
 }
 

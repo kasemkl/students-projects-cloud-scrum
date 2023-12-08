@@ -40,3 +40,8 @@ strong{
     margin: 5px;
     min-width: 135px;
 }
+
+.filter{
+display: flex;
+justify-content: flex-end;
+}

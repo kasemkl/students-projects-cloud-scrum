@@ -63,7 +63,7 @@ const SignUp = ({ onLogin }) => {
         ) : (
          <p>no photo selected</p>
         )}
-        <input type="file" name="profile_photo" onChange={handleInputChange} />
+        <input type="file" name="profile_photo" onChange={handleInputChange} Value={'../../../backend/media/images/default_profile_photo.jpg'}/>
       </div>
 
 

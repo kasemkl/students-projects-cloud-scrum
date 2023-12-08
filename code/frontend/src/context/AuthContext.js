@@ -10,7 +10,7 @@ export const AuthProvider=({children})=>{
     
     const navigate=useNavigate()
     let [authTokens, setAuthTokens] = useState(()=> localStorage.getItem('authTokens') ? JSON.parse(localStorage.getItem('authTokens')) : null)
-    let [user, setUser] = useState(()=> localStorage.getItem('authTokens') ? jwtDecode(localStorage.getItem('authTokens')) : null)
+    let [user, setUser] = useState(()=> authTokens ? jwtDecode(authTokens.access) : null)
     const [isLoggedIn,setIsLoggedin]=useState(true)
     let [loading, setLoading] = useState(true)
 
@@ -35,6 +35,7 @@ export const AuthProvider=({children})=>{
             setUser(jwtDecode(data.access));
             localStorage.setItem('authTokens', JSON.stringify(data));
             console.log(user);
+            
             navigate('/');
           } else {
             console.error(`Error: ${response.status} - ${response.statusText}`);
