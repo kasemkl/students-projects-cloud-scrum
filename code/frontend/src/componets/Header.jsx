@@ -12,19 +12,19 @@ import UserInfoContext from '../context/UserInfoContext';
 
 const Header = () => {
     let {user,logoutUser}=useContext(AuthContext)
-    const {userImage}=useContext(UserInfoContext)
+    const {userInfo}=useContext(UserInfoContext)
   return (
     <div>
       <Navbar expand="lg" className="bg-body-tertiary NavBar" bg="dark" data-bs-theme="dark">
         <Container>
       {user && <Navbar.Brand as={Link} to="/settings">
          <img
-              src={userImage}
+              src={userInfo.profile_photo}
               className="d-inline-block align-top"
               alt="React Bootstrap logo"
             />
             <span>
-                {user.first_name}
+                {userInfo.first_name}
                 </span>
           </Navbar.Brand>}
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -38,14 +38,11 @@ const Header = () => {
             <NavDropdown title="Options" id="basic-nav-dropdown">
             {user && user.groups && (user.groups.includes('supervisor') || user.groups.includes('manager')) &&
             <NavDropdown.Item as={Link} to="/add-sugg">Add suggestion</NavDropdown.Item>}
+              <NavDropdown.Divider />
+              <NavDropdown.Item as={Link} to="/settings">Settings</NavDropdown.Item>
             <NavDropdown.Item  as={Link}to="/login" onClick={logoutUser}>
                logout
             </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="#action/3.3">Something</NavDropdown.Item>
-              <NavDropdown.Divider />
-              <NavDropdown.Item as={Link} to="#action/3.4">
-                Separated link
-              </NavDropdown.Item>
             </NavDropdown>
           </Nav>
         </Navbar.Collapse>}

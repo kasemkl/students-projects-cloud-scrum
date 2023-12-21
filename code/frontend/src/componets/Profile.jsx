@@ -5,7 +5,6 @@ import { useState } from 'react'
 import UserInfoContext from '../context/UserInfoContext'
 
 const Profile = () => {
-    const {user}=useContext(AuthContext)
     const api=useAxios()
     const [formData, setFormData] = useState({
       email:'',
@@ -15,12 +14,12 @@ const Profile = () => {
       profile_photo: null,  
     });
     const [imageSrc, setImageSrc] = useState([]);
-    const {userImage,updateUserInfo}=useContext(UserInfoContext)
+    const {userInfo,updateUserInfo}=useContext(UserInfoContext)
 
     useEffect(() => {
       // Set the imageSrc inside useEffect to ensure userImage is available
-      setImageSrc(userImage);
-    }, [userImage]);
+      setImageSrc(userInfo.profile_photo);
+    }, [userInfo]);
     const handleInputChange = (e) => {
       const { name, value } = e.target;
       const updatedFormData = { ...formData, [name]: value };
@@ -61,7 +60,7 @@ const Profile = () => {
                 <div className="col">
                   <div className="row align-items-center">
                     <div className="col-md-7">
-                      <h4 className="mb-1">{user.first_name} {user.last_name}</h4>
+                      <h4 className="mb-1">{userInfo.first_name} {userInfo.last_name}</h4>
                       <p className="small mb-3"><span className="badge badge-dark">New York, USA</span></p>
                     </div>
                   </div>
@@ -84,20 +83,20 @@ const Profile = () => {
               <div className="form-row">
                 <div className="form-group col-md-6">
                   <label htmlFor="firstname">University ID</label>
-                  <input type="text" id="firstname" className="form-control" placeholder={user.university_id} readOnly/>
+                  <input type="text" id="firstname" className="form-control" placeholder={userInfo.university_id} readOnly/>
                 </div>
                 <div className="form-group col-md-6">
                   <label htmlFor="firstname">Firstname</label>
-                  <input type="text" id="firstname" className="form-control" placeholder={user.first_name} readOnly/>
+                  <input type="text" id="firstname" className="form-control" placeholder={userInfo.first_name} readOnly/>
                 </div>
                 <div className="form-group col-md-6">
                   <label htmlFor="lastname">Lastname</label>
-                  <input type="text" id="lastname" className="form-control" placeholder={user.last_name} readOnly />
+                  <input type="text" id="lastname" className="form-control" placeholder={userInfo.last_name} readOnly />
                 </div>
               </div>
               <div className="form-group">
                 <label htmlFor="inputEmail4">Email</label>
-                <input type="email" className="form-control" id="inputEmail4" placeholder={user.email} name='email' onChange={handleInputChange}/>
+                <input type="email" className="form-control" id="inputEmail4" placeholder={userInfo.email} name='email' onChange={handleInputChange}/>
               </div>
               <hr className="my-4" />
               <div className="row mb-4">

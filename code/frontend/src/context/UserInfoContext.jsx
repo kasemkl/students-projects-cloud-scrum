@@ -10,16 +10,29 @@ const UserInfoContext=createContext()
 export default UserInfoContext; 
 
 export  const UserInfoProvider=({children})=>{
-    const {user}=useContext(AuthContext)
+    const {user,authtokens,loginUser,logoutUser}=useContext(AuthContext)
     const api=useAxios()
-    const [userImage,setUserImage]=useState()
+    const [userInfo,setUserInfo]=useState({
+      university_id:'',
+      first_name:'',
+      last_name:'',
+      email:'',
+      type:'',
+      profile_photo:''
+    })
     const [load,setLoad]=useState(true)
     useEffect(() => {
         const fetchData = async () => {
           try {
             const response = await api.get('/user/');
             if (response.status === 200) {
-              setUserImage(`http://127.0.0.1:8000${response.data.profile_photo_url}`);
+              console.log(response.data)
+              const completeUserInfo = {
+                ...response.data,
+                profile_photo: `http://127.0.0.1:8000${response.data.profile_photo}`,
+              };
+              setUserInfo(completeUserInfo);
+            console.log(userInfo)
             }
           } catch (error) {
             console.error('Error fetching requests:', error);
@@ -27,7 +40,7 @@ export  const UserInfoProvider=({children})=>{
         };
     
         fetchData();
-      }, [load]);
+      }, [load,authtokens,logoutUser,loginUser]);
 
       const updateUserInfo= async(formData)=>{
                 try {
@@ -54,7 +67,7 @@ export  const UserInfoProvider=({children})=>{
       }
 
 const Data={
-    userImage:userImage,
+    userInfo:userInfo,
     updateUserInfo:updateUserInfo
 }
 return (

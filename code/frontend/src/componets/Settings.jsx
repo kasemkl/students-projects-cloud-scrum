@@ -9,6 +9,8 @@ const Settings = ({data}) => {
       <div className="row justify-content-center">
         <div className="col-12 col-lg-10 col-xl-8 mx-auto">
           <h2 className="h3 mb-4 page-title">Settings</h2>
+          <div className=''>
+
           <div className="my-4">
             <ul className="nav nav-tabs mb-4" id="myTab" role="tablist">
                 {data.map((row,index)=> 
@@ -20,6 +22,7 @@ const Settings = ({data}) => {
 
             <Profile/>
 
+          </div>
           </div>
         </div>
       </div>

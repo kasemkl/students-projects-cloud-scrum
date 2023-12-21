@@ -24,8 +24,13 @@
     flex-direction: row;
     width: 100%;
     margin-bottom: 15px;
-    border: solid black 1px;
+    border: solid #fff 1px !important;
     padding: 20px;
+    border-radius: 35px !important;
+    background-color: #FFF !important;
+    color: #11101D !important;
+    box-shadow: 0 4px 8px rgb(49 36 73 / 17%); /* Box shadow properties */
+
 }
 strong{
     font-weight: 500;
@@ -38,10 +43,49 @@ strong{
 }
 .btn{
     margin: 5px;
-    min-width: 135px;
+    min-width: 40px;
 }
 
 .filter{
 display: flex;
 justify-content: flex-end;
 }
+.card p span{
+    font-weight: 500;
+    color: #11101D;
+}
+
+.card-content{
+    font-size: 15px;
+    color: #8d8686;
+}
+.pagination  .btn{
+    /* width: 40px; */
+    height: auto;
+    background-color: #4b3567;
+    border: none;
+    color: #fff;
+    border-radius: 10px !important;
+    transition: all 0.7s ease;
+}
+.pagination .active {
+    border: none;
+    color: #11101D !important  ;
+    border-radius: 10px !important;
+    background-color: #fff !important;
+    /* Add any other styles you want for the active button */
+  }
+.pagination .btn:hover {
+    /* border: 2px solid #FFF; */
+    color: #11101D !important;
+    background-color: #fff !important;
+    /* Add any other styles you want for the active button */
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+  }
+  

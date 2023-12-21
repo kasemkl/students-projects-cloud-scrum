@@ -1,12 +1,12 @@
 import logo from './logo.svg';
-import './App.css';
+
 import Sign from './componets/Sign'
 import LoginForm from './componets/LoginForm';
 import { useContext, useState, useEffect } from 'react';
 import SuggProjectsList from './componets/SuggProjectsList';
 import Card from './componets/Card';
 import Nav from './componets/Nav';
-import {Link,Route,Routes ,Navigate} from 'react-router-dom'
+import {Link,Route,Routes } from 'react-router-dom'
 import Request from './componets/Request'
 import ProjectsList from './componets/ProjectsList'
 import ManagerRequestList from './componets/ManagerRequestList'
@@ -22,8 +22,14 @@ import Header from './componets/Header';
 import ContextualExample from './componets/ContextualExample';
 import SettingsPage from './pages/SettingsPage';
 import { UserInfoProvider } from './context/UserInfoContext';
-function App() {
+import SideBar from './componets/SideBar';
+import { useNavigate,useLocation } from 'react-router-dom';
 
+function App() {
+  const location = useLocation();
+  const currentRoute = location.pathname;
+
+  const renderSideBar = (currentRoute !== '/sign-up' && currentRoute !== '/login')
   return (
     <div className="">
       {/* <Nav />
@@ -33,10 +39,12 @@ function App() {
         <Route path='/manager-request-list' element={<ManagerRequestList />} />
         <Route path='/add-sugg' element={<Request />} />
       </Routes> */}
-       <Router>
+       
       <AuthProvider>
         <UserInfoProvider>
-        <Header/>
+
+        {renderSideBar&& <SideBar/>}
+        <div className={renderSideBar?'home-section':'Form'}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/" element={<PrivateRoute element={<HomePage />} />} />
@@ -49,9 +57,9 @@ function App() {
           <Route path='/settings' element={<SettingsPage/>} /> 
           
         </Routes>
+        </div>
         </UserInfoProvider>
       </AuthProvider>
-    </Router>
       </div>
   );
 }

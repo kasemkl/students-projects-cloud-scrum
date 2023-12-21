@@ -5,6 +5,16 @@
     box-sizing: border-box;
     /* font-family:   cursive,fangsong; */
   }
+  body {
+    font-family: "Poppins" , sans-serif; 
+    background-color: #f1f1f1 !important;
+    color: #11101D;
+}
+.btn-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center !important;
+}
   .content-container{
     display: flex;
     justify-content: center;
@@ -17,13 +27,13 @@
   color: red;
   font-size: 12px;
 }
-button:disabled,
+/* button:disabled,
 button[disabled] {
   border: 1px solid #999999;
   background-color: #cccccc;
-  color: #666666;
+  color: #666666; */
   /* cursor: not-allowed; */
-}
+/* } */
 /* .App {
   text-align: center;
 }

@@ -15,11 +15,13 @@ const CardProjects = ({ formData }) => {
     <div className="card" >
       <div className="card-body">
         <h3 className="card-title">{title}</h3>
-        <p className="card-text"><strong>Description:</strong> {description}</p>
-        <p className="card-text"><strong>goal:</strong> {goal}</p>
-        <p className="card-text"><strong>department:</strong> {department_id}</p>
-        <p className="card-text"><strong>supervisor_id:</strong> {supervisor_id }</p>
-        <p className="card-text"><strong>darte:</strong> {date}</p>
+        <div className='card-content'>
+        <p className="card-text"><span>Description:</span> {description}</p>
+        <p className="card-text"><span>Goal:</span> {goal}</p>
+        <p className="card-text"><span>Department:</span> {department_id}</p>
+        <p className="card-text"><span>Supervisor_id:</span> {supervisor_id }</p>
+        <p className="card-text"><span>Date:</span> {date}</p>
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,18 @@
-.request{
+/* .request{
     display: flex;
     justify-content: center;
-}
+} */
+
+.request fieldset {
+    display: flex !important;
+    height: auto ;
+ 
+    min-width: 480px !important;
+    padding: 30px !important;
+    border: 1px solid #ccc !important;
+    border-radius: 20px !important;
+    flex-direction: column !important;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgb(49 36 73 / 17%);
+  }
+  

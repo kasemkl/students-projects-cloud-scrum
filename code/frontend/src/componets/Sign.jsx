@@ -48,24 +48,36 @@ password,
 } = formData;
 
 return (
-<form onSubmit={handleSubmit}>
-<fieldset>
-<h2>Log in</h2>
-<div className="field">
-<label>University ID <sup></sup></label>
-<input type="text" placeholder="Type your university id..." name="university_id" value={university_id} onChange={handleChange} />
-</div>
-<div className="field">
-<label>Password </label>
-<input type="password" placeholder="Type your password name..." name="password" value={password} onChange={handleChange} />
-</div>
-<div className="field">
-<button type="submit">
-Login
-</button>
-</div>
-</fieldset>
-</form>
+  <form onSubmit={handleSubmit}>
+    <fieldset>
+      <h2>Log in</h2>
+      <div className="field">
+        <label>
+          University ID <sup></sup>
+        </label>
+        <input
+          type="text"
+          placeholder="Type your university id..."
+          name="university_id"
+          value={university_id}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="field">
+        <label>Password </label>
+        <input
+          type="password"
+          placeholder="Type your password name..."
+          name="password"
+          value={password}
+          onChange={handleChange}
+        />
+      </div>
+      <div className="field">
+        <button type="submit">Login</button>
+      </div>
+    </fieldset>
+  </form>
 );
 }
 

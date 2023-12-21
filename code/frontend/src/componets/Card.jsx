@@ -9,7 +9,7 @@ import {
 } from 'mdb-react-ui-kit';
 import AuthContext from '../context/AuthContext';
 import { Link } from 'react-router-dom';
-import useAxios from './../utils/useAxios';
+import useAxios from '../utils/useAxios';
 
 const Card = ({ formData }) => {
   let {user}=useContext(AuthContext)
@@ -39,10 +39,12 @@ const Card = ({ formData }) => {
     <div className="card" >
       <div className="card-body">
         <h3 className="card-title">{title}</h3>
-        <p className="card-text"><strong>Description:</strong> {description}</p>
-        <p className="card-text"><strong>goal:</strong> {goal}</p>
-        <p className="card-text"><strong>department:</strong> {department}</p>
-        <p className="card-text"><strong>supervisor:</strong> {supervisor_name}</p>
+        <div className='card-content'>
+        <p className="card-text"><span>Description:</span> {description}</p>
+        <p className="card-text"><span>goal:</span> {goal}</p>
+        <p className="card-text"><span>department:</span> {department}</p>
+        <p className="card-text"><span>supervisor:</span> {supervisor_name}</p>
+        </div>
       </div>
       <div className='buttons'>
         {user.groups.includes('student') && <Link to="#" className="btn btn-success">Apply</Link>}

@@ -64,5 +64,5 @@ class USERserilizer(serializers.ModelSerializer):
 class UserInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
-        fields = ['university_id', 'profile_photo']
+        fields = ['university_id', 'profile_photo','first_name','last_name','email','type']
         

@@ -53,3 +53,11 @@ def getByID(refefence,id):
     key: value for key, value in all_data.items() if value.get('receiver_id') == id
 }
     return filtered_data
+  
+def Logging(data):
+        ref=db.reference('Logging')
+        # Use push() to generate a unique key 
+        new_project_key = ref.push().key
+        # Save the data to Firebase using the unique key
+        ref.child(new_project_key).set(data)
+        return data

@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .permissions import IsManager, IsSupervisor
-from .firebase import getData, getSingleRow, postData, deleteData,getByID
+from .firebase import getData, getSingleRow, postData, deleteData,getByID,Logging
 from .validition import validateRequestsData
 from .serilizers import *  # Make sure to import your serializers
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -39,7 +39,7 @@ class UserRegister(APIView):
                 if image_file:
                     instance.profile_photo = image_file
                     instance.save()
-
+                Logging({'action':f"Register new account with university ID={clean_data['university_id']} and first_name={clean_data['first_name']}",'date':date})
                 return Response(serializer.validated_data, status=status.HTTP_201_CREATED)
             else:
                 # Access the 'detail' attribute, not 'error_list'
@@ -56,8 +56,11 @@ class DepartmentView(APIView):
         return Response(data)
 
     def post(self, request):
+        user=request.user.university_id
         reference = 'department'
         data = postData(reference, request.data)
+        Logging({'action':f"user with university ID={user} add new department={request.data['department_name']}",
+                'data':data,'date':date})
         return Response(data)
 
 class SuggestProjectView(APIView):
@@ -69,16 +72,21 @@ class SuggestProjectView(APIView):
         return Response(data)
 
     def post(self, request):
+        user=request.user.university_id
         reference = 'suggestion_projects'
         data = postData(reference, request.data)
+        Logging({'action':f"user with university ID={user} Add new Suggestion project with title={request.data.get('title')}",'date':date})
         return Response(data)
 
 class DeleteSuggProject(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, id):
+        user=request.user.university_id
         try:
             deleteData('suggestion_projects', id)
+            Logging({'action':f"user with university ID={user} Delete Suggestion project with id={id}",
+                    'date':date})
             return Response({'message': 'suggestion project deleted'})
         except Exception as e:
             error_message = str(e)
@@ -99,7 +107,6 @@ class ProjectsView(APIView):
 
 class RequestsView(APIView):
     permission_classes = [IsAuthenticated, IsSupervisor | IsManager]
-
     def get(self, request):
         reference = 'requests'
         data = getData(reference)
@@ -107,9 +114,12 @@ class RequestsView(APIView):
 
     def post(self, request):
         reference = 'requests'
+        user=request.user.university_id
         try:
             if validateRequestsData(request.data):
                 data = postData(reference, request.data)
+                Logging({'action':f"user with university ID={user} Add new Suggestion project request with title={request.data.get('title')}",
+                        'data':data,'date':date})
                 return Response(data, status=status.HTTP_201_CREATED)
             else:
                 return Response({'ERROR': "the request has missing fields"}, status=status.HTTP_400_BAD_REQUEST)
@@ -130,6 +140,7 @@ class ManagerRequestsView(APIView):
         request_id = request.data.get('id')
         decision = request.data.get('status')
         sender=request.data.get('user_name')
+        user=request.user.university_id
         try:
             request_instance = getSingleRow('requests', request_id)
         except Exception:
@@ -138,16 +149,21 @@ class ManagerRequestsView(APIView):
         try:
             if decision == 'accepted':
                 if validateRequestsData(request_instance):
-                    postData('suggestion_projects', request_instance)
+                    data=postData('suggestion_projects', request_instance)
                     notification={'message':'Your suggestions is approved by the manager',
                                 'sender':sender,
                                 'receiver_id':int(request_instance['supervisor_id']),
                                 'date':date}
                     postData('notifications',notification)
+                    Logging({"action":f"user with university ID={user} accept Suggestion project request with title={request.data.get('title')}",
+                            'data':data,'date':date})
                     deleteData('requests', request_id)
                 else:
+                    Logging({"action":f"user with university ID={user} delete Suggestion project request with title={request.data.get('title')}",
+                            'data':request_instance,'date':date})
                     return Response({'ERROR': "invalid data"})
             else:
+                
                 deleteData('requests', request_id)
         except Exception as e:
             error_message = str(e)
@@ -167,7 +183,7 @@ class Notifications(APIView):
 class UpdateProfile(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request):
-        
+        user=request.user.university_id 
         if request.data.get('old_password') and request.data.get('new_password'):
             old_password = request.data.get('old_password')
             new_password = request.data.get('new_password')
@@ -186,7 +202,7 @@ class UpdateProfile(APIView):
             request.user.email=new_email
                 
         request.user.save()
-        
+        Logging({"action":f"user with university ID={user} update his profile data",'date':date})
         return Response({'message': 'Profile updated successfully'}, status=status.HTTP_200_OK)
 
 
@@ -197,7 +213,7 @@ class UserInfo(APIView):
         try:
             user = Account.objects.get(university_id=request.user.university_id)
             serializer = UserInfoSerializer(user)
-            return Response({'profile_photo_url': serializer.data['profile_photo']})
+            return Response(serializer.data)
         except Account.DoesNotExist:
             return Response({'message': 'User not found'}, status=404)
         
