@@ -57,29 +57,50 @@ export const AuthProvider=({children})=>{
     }
 
     let registerUser = async (formData) => {
-        try {
-            const formDataObj = new FormData();
-            Object.entries(formData).forEach(([key, value]) => {
-                formDataObj.append(key, value);
-            });
-            console.log('form',formDataObj)
-            let response = await fetch('http://127.0.0.1:8000/register/', {
-                method: 'POST',
-                body: formDataObj,
-            });
+      try {
+          const formDataObj = new FormData();
+          Object.entries(formData).forEach(([key, value]) => {
+              formDataObj.append(key, value);
+          });
+  
+          console.log('form', formDataObj);
+  
+          // Return the fetch promise
+          return fetch('http://127.0.0.1:8000/register/', {
+              method: 'POST',
+              body: formDataObj,
+          });
+      } catch (error) {
+          console.error('Error fetching requests:', error);
+          // If an error occurs, you might want to reject the promise here
+          return Promise.reject(error);
+      }
+  };
+    // let registerUser = async (formData) => {
+    //     try {
+    //         const formDataObj = new FormData();
+    //         Object.entries(formData).forEach(([key, value]) => {
+    //             formDataObj.append(key, value);
+    //         });
+    //         console.log('form',formDataObj)
+    //         let response = await fetch('http://127.0.0.1:8000/register/', {
+    //             method: 'POST',
+    //             body: formDataObj,
+    //         });
     
-            let data = await response.json();
+    //         let data = await response.json();
     
-            if (response.status === 201) {
-                console.log(data)
-                loginUser(formData)
-            } else {
-                console.log(data, '', response.status);
-            }
-        } catch (error) {
-            console.error('Error fetching requests:', error);
-        }
-    };
+    //         if (response.status === 201) {
+    //             console.log(data)
+    //             loginUser(formData)}
+    //         // } else {
+    //         //     console.log(data, '', response.status);
+    //         // }
+    //       } catch (error) {
+    //         console.error('Error fetching requests:', error);
+    //         return response.data.message;
+    //       }
+    // };
     
     // let updateToken = async ()=> {
     //     console.log('update token ')

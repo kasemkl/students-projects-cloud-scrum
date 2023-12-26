@@ -1,29 +1,30 @@
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
- const Dialog=(props)=> {
-  return (
+ const ConfirmDialog=(props)=> {
+  const {onConfirm,...others}=props
+    return (
     <Modal
-      {...props}
+      {...others}
       size="lg"
       aria-labelledby="contained-modal-title-vcenter"
       centered
     >
       <Modal.Header closeButton>
         <Modal.Title id="contained-modal-title-vcenter">
-         {props.title}
+        Confirmation
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <p>
-          {props.text}
-        </p>
+        Are you sure you want to delete?
+                </p>
       </Modal.Body>
-      {props.text!=='please wait a second...' && 
       <Modal.Footer>
-        <Button onClick={props.onHide}>OK</Button>
-      </Modal.Footer>}
+        <Button variant='primary' onClick={props.onConfirm}>Yes</Button>
+        <Button variant='secondary' onClick={props.onHide}>Cancel</Button>
+      </Modal.Footer>
     </Modal>
   );
 }
 
-export default Dialog;
+export default ConfirmDialog;

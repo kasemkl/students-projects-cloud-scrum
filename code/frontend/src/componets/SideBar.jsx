@@ -16,7 +16,7 @@ const SideBar = () => {
   return (
     <div className={`sidebar ${isSidebarOpen ? "open" : ""}`}>
       <div className="logo-details">
-        <i className='bx bxs-graduation icon'></i>
+        <i className="bx bxs-graduation icon"></i>
         <div className="logo_name">GradutionLab</div>
         <i
           className={`bx ${isSidebarOpen ? "bx-menu-alt-right" : "bx-menu"}`}
@@ -37,37 +37,57 @@ const SideBar = () => {
           </Link>
           <span className="tooltip">Dashboard</span>
         </li>
-        
+
         <li>
           <Link to="/sugg-list">
-          <i className='bx bxs-book-add'></i>
-        <span className="links_name">Suggestion Projects</span>
+            <i className="bx bxs-book-add"></i>
+            <span className="links_name">Suggestion Projects</span>
           </Link>
           <span className="tooltip">Suggestion Projects</span>
         </li>
+        {userInfo.groups.includes('supervisor') &&
         <li>
           <Link to="/add-sugg">
-          <i className='bx bx-add-to-queue'></i>
-        <span className="links_name">Add Suggestion </span>
+            <i className="bx bx-add-to-queue"></i>
+            <span className="links_name">Add Suggestion </span>
           </Link>
           <span className="tooltip">Add Suggestion </span>
-        </li>
-
-        {/* <li>
-          <Link to="#">
-            <i className="bx bx-user"></i>
-            <span className="links_name">User</span>
-          </Link>
-          <span className="tooltip">User</span>
-        </li>
+        </li>}
+          {userInfo.type === "student" ? (
+            <li>
+              <Link to="inbox">
+                <i className="bx bx-message-alt-add"></i>
+                <span className="links_name">Requests</span>
+              </Link>
+              <span className="tooltip">Requests</span>
+            </li>
+          ) : (
+            <li>
+              <Link to="supervisor-inbox">
+                <i className="bx bx-message-alt-add"></i>
+                <span className="links_name">Requests</span>
+              </Link>
+              <span className="tooltip">Requests</span>
+            </li>
+          )}
+          {userInfo.groups.includes('supervisor') &&
         <li>
-          <Link to="#">
-            <i className="bx bx-chat"></i>
-            <span className="links_name">Messages</span>
+          <Link to="my-requests">
+            <i className="bx bxs-message-alt-edit"></i>{" "}
+            <span className="links_name">MY Requests</span>
           </Link>
-          <span className="tooltip">Messages</span>
-        </li>
-        <li>
+          <span className="tooltip">My Requests</span>
+        </li>}
+        {userInfo.groups.includes("manager") && (
+          <li>
+            <Link to="manager-request-list">
+              <i className="bx bx-book-alt"></i>
+              <span className="links_name">Suggestion Requests </span>
+            </Link>
+            <span className="tooltip">Suggetions Requests</span>
+          </li>
+        )}
+        {/*<li>
           <Link to="#">
             <i className="bx bx-pie-chart-alt-2"></i>
             <span className="links_name">Analytics</span>
@@ -101,13 +121,15 @@ const SideBar = () => {
             <span className="links_name">Setting</span>
           </Link>
           <span className="tooltip">Setting</span>
-        </li> 
+        </li>
         <li className="profile">
           <div className="profile-details">
             <img src={userInfo.profile_photo} alt="profileImg" />
             <div className="name_job">
-              <div className="name">Prem Shahi</div>
-              <div className="job">Web designer</div>
+              <div className="name">
+                {userInfo.first_name} {userInfo.last_name}
+              </div>
+              <div className="job">{userInfo.type}</div>
             </div>
           </div>
           <i className="bx bx-log-out" id="log_out" onClick={logoutUser}></i>

@@ -40,3 +40,15 @@ class Account(AbstractBaseUser, PermissionsMixin):
     
     def __str__(self):
         return str(self.university_id)
+
+
+
+class University_students(models.Model):
+    university_id=models.IntegerField(primary_key=True)
+    first_name=models.CharField(max_length=255)
+    last_name=models.CharField(max_length=255)
+    number_of_hours=models.IntegerField()
+    application_subject=models.BooleanField(default=False)
+    junior_project=models.BooleanField(default=False)
+    graduation1_project=models.BooleanField(default=False)
+    GPA=models.FloatField()

@@ -54,6 +54,25 @@ def getByID(refefence,id):
 }
     return filtered_data
   
+def getDataByID(refefence,field,id):
+    ref=db.reference(refefence)
+    try:
+        all_data = ref.get()
+        if all_data is None:
+            return {}
+        
+        filtered_data = {
+            key: value for key, value in all_data.items() if value.get(field) == id
+        }
+        return filtered_data
+    except Exception as e:
+        return {}
+  
+def editDataByID(reference,id,newData):
+  ref=db.reference(reference)
+  data=ref.child(id).update(newData)
+  return data
+  
 def Logging(data):
         ref=db.reference('Logging')
         # Use push() to generate a unique key 
@@ -61,3 +80,44 @@ def Logging(data):
         # Save the data to Firebase using the unique key
         ref.child(new_project_key).set(data)
         return data
+      
+def addStudentRequest(data):
+    ref = db.reference('students_requests')
+    new_project_key = ref.push().key
+    ref.child(new_project_key).set(data)
+    return data
+  
+def get_user_projects(reference, user_id):
+    data = db.reference(reference).get()
+
+    user_projects = {}
+    if data :
+      for project_id, project_data in data.items():
+          students_data = project_data.get("students", {})
+          if str(user_id) in students_data:
+            user_projects[project_id] = project_data
+                
+    return user_projects
+  
+def check_if_apply_projects(reference, user_id):
+    data = db.reference(reference).get()
+    if data:
+        for project_id, project_data in data.items():
+            students_data = project_data.get("students", {})
+
+            if str(user_id) in students_data:
+                return True
+
+    return False
+
+def get_supervisor_projects(reference, user_id):
+    data = db.reference(reference).get()
+
+    user_projects = {}
+    if data :
+      for project_id, project_data in data.items():
+          supervisor = project_data.get('supervisor_id')
+          if supervisor ==user_id :
+            user_projects[project_id] = project_data
+                
+    return user_projects

@@ -48,3 +48,6 @@ img {
         color:#212529;
         transition: 0.5s;
     }
+.nav-item,.nav-link{
+    background-color: transparent !important;
+}

@@ -14,10 +14,19 @@ urlpatterns = [
     path('departments/', DepartmentView.as_view(), name='departments'),
     path('projects/', ProjectsView.as_view(), name='projects'),
     path('requests/', RequestsView.as_view(), name='requests'),
+    path('myrequests/', MyRequestsView.as_view(), name='myrequests'),
+    path('delete-requests/', MyRequestDeleteView.as_view(), name='myrequests'),
     path('manager-requests-list/', ManagerRequestsView.as_view(), name='manager-requests-list'),
     path('notifications/<int:id>/', Notifications.as_view(), name='notifications'),
     path('update-profile/',UpdateProfile.as_view(),name='update-profile'),
     path('user/',UserInfo.as_view(),name='user'),
+    path('apply-project/',ApplyProjectView.as_view()),
+    path('students-requests/',StudentsRequests.as_view()),
+    path('check-projects/',Check_if_Apply_project.as_view()),
+    path('update-students-requests/',Update_Students_Requests.as_view()),
+    path('requests-to-supervisors/',Request_To_Supervisor.as_view()),
+    
+    
 ]
 
 if settings.DEBUG:

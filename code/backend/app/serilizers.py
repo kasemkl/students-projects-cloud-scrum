@@ -26,11 +26,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         try:
-            # Check if 'profile_photo' is not provided or is an empty string
-            if not validated_data.get('profile_photo', ''):
-                # Set the default profile photo filename with the user's university_id
-                validated_data['profile_photo'] = f"images/{validated_data['university_id']}.jpg"
-
             user = Account.objects.create_user(**validated_data)
             return user
         except Exception as e:
@@ -62,7 +57,11 @@ class USERserilizer(serializers.ModelSerializer):
         fields=['__all__']
 
 class UserInfoSerializer(serializers.ModelSerializer):
+    groups = serializers.SerializerMethodField()
+
     class Meta:
         model = Account
-        fields = ['university_id', 'profile_photo','first_name','last_name','email','type']
-        
+        fields = ['university_id', 'profile_photo', 'first_name', 'last_name', 'email', 'type', 'groups']
+
+    def get_groups(self, obj):
+        return obj.groups.values_list('name', flat=True)

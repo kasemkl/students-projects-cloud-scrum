@@ -1,0 +1,13 @@
+.accept,.sender{
+color:green !important;
+}
+
+.pending{
+color:orange !important;
+}
+.info{
+    color: #7d7b8a;
+}
+.status{
+    color: #7d7b8a !important;
+}

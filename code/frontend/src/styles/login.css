@@ -92,8 +92,9 @@
    cursor: pointer;
    transition: all 0.3s ease;
  }
- fieldset button:hover {
+ fieldset button:hover{
     background-color: #65329c;
+    color: #fff;
 }
  .Form .login-signup{
    font-size: 12px;

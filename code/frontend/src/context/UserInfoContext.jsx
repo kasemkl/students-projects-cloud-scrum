@@ -18,6 +18,7 @@ export  const UserInfoProvider=({children})=>{
       last_name:'',
       email:'',
       type:'',
+      groups:[],
       profile_photo:''
     })
     const [load,setLoad]=useState(true)
@@ -26,13 +27,12 @@ export  const UserInfoProvider=({children})=>{
           try {
             const response = await api.get('/user/');
             if (response.status === 200) {
-              console.log(response.data)
               const completeUserInfo = {
                 ...response.data,
                 profile_photo: `http://127.0.0.1:8000${response.data.profile_photo}`,
               };
               setUserInfo(completeUserInfo);
-            console.log(userInfo)
+              console.log(userInfo)
             }
           } catch (error) {
             console.error('Error fetching requests:', error);
@@ -55,12 +55,10 @@ export  const UserInfoProvider=({children})=>{
             console.log('form',formDataObj)
             let response = await api.post('/update-profile/',formDataObj);
             if (response.status === 200) {
-                console.log(response.data)
+                
                 setLoad(!load)
 
-            } else {
-                console.log('data', '', response.status);
-            }
+            } 
         } catch (error) {
             console.error('Error fetching requests:', error);
         }

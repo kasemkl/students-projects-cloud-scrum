@@ -1,13 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import Card from './Card';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import Card from '../componets/Card';
 import '../styles/projectslist.css';
 import axios from 'axios';
 import Loading from '../componets/Loading';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import useAxios from '../utils/useAxios';
 import ReactPaginate from 'react-paginate';
+import UserInfoContext from '../context/UserInfoContext';
+import RenderContext from '../context/RenderContext';
 
 const SuggProjectsList = () => {
+  const {userInfo}=useContext(UserInfoContext)
   const [data, setData] = useState([]);
   const api = useAxios();
   const [projectsBySupervisor, setProjectsBySupervisor] = useState({});
@@ -21,6 +24,11 @@ const SuggProjectsList = () => {
   const [pageNumber, setPageNumber] = useState(0);
   const [projectsPerPage, setProjectsPerPage] = useState(3);
   const [pageCount,setPageCount]=useState(3)
+  const [isEmpty,setIsEmpty]=useState(false)
+  const [studentsRequests,setStudentsRequests]=useState({})
+  const [isApplied,setIsApplied]=useState(false)
+  const [projectApplied,setProjectApplied]=useState()
+  const {render,setRender}=useContext(RenderContext)
   const fetchData = async () => {
     try {
       const response = await api.get('/sugg-projects/');
@@ -31,15 +39,52 @@ const SuggProjectsList = () => {
         ...rawData[key],
       }));
       setData(dataArray);
+      if(dataArray.length===0){
+        setIsEmpty(true)
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
 
+
+  
+
   useEffect(() => {
     fetchData();
   }, []);
+  
+  const maxRuns=1; 
+  const [runCount, setRunCount] = useState(0);
 
+  useEffect(()=>{
+    setRunCount(0);
+  },[render])
+
+  useEffect(() => {
+    console.log(runCount,'llll',render)
+
+    const fetchRequestsData = async () => {
+      try {
+        const response = await api.get('/check-projects/');
+      
+        setIsApplied(response.data.applied)
+        // Update the run count
+        setRunCount((prevCount) => prevCount + 1);
+  
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+  
+    // Run the effect only if the run count is less than the maximum runs
+    if (runCount < maxRuns) {
+      fetchRequestsData();
+      console.log(projectApplied)
+    }
+  
+  
+  }, [runCount]); // Include dependencies as needed
   
   useEffect(() => {
     const groupedProjects = {};
@@ -110,7 +155,7 @@ const SuggProjectsList = () => {
       return (
         <div className='projects-list'>
           {displayProjects.map((suggProject) => (
-            <Card key={suggProject.id} formData={suggProject} />
+            <Card key={suggProject.id} formData={suggProject}  isApplied={isApplied}/>
           ))}
         </div>
       );
@@ -123,7 +168,7 @@ const SuggProjectsList = () => {
       return (
         <div className='projects-list'>
           {displayProjects.map((suggProject) => (
-            <Card key={suggProject.id} formData={suggProject} />
+            <Card key={suggProject.id} formData={suggProject}  isApplied={isApplied}/>
           ))}
         </div>
       );
@@ -136,7 +181,7 @@ const SuggProjectsList = () => {
               <h2>Supervisor: {supervisor.name}</h2>
               <div className='projects-list'>
                 {projectsBySupervisor[supervisor.id]?.map((suggProject) => (
-                  <Card key={suggProject.id} formData={suggProject} />
+                  <Card key={suggProject.id} formData={suggProject}  isApplied={isApplied}/>
                 ))}
               </div>
             </div>
@@ -152,7 +197,7 @@ const SuggProjectsList = () => {
               <h2>Department: {department.name}</h2>
               <div className='projects-list'>
                 {projectsByDepartments[department.name]?.map((suggProject) => (
-                  <Card key={suggProject.id} formData={suggProject} />
+                  <Card key={suggProject.id} formData={suggProject}  isApplied={isApplied}/>
                 ))}
               </div>
             </div>
@@ -166,7 +211,7 @@ const SuggProjectsList = () => {
         <div>
           <div className='projects-list'>
             {displayProjects.map((suggProject) => (
-              <Card key={suggProject.id} formData={suggProject} />
+              <Card key={suggProject.id} formData={suggProject}  isApplied={isApplied}/>
             ))}
           </div>
         </div>
@@ -249,8 +294,7 @@ const SuggProjectsList = () => {
         <NavDropdown.Item onClick={() => handleClear()}>clear filter </NavDropdown.Item>
       </NavDropdown>
 
-      <div className={data.length === 0 ? 'content-container' : ''}>
-        {data.length > 0 ? (
+        {data.length > 0 && runCount>0 ? (
           <div>
             {renderGroupedProjects()}
             <ReactPaginate
@@ -266,11 +310,12 @@ const SuggProjectsList = () => {
               pageLinkClassName={'btn'}
             />
           </div>
-        ) : (
+        ) : isEmpty?<div>No suggestion Projects</div>:
+        (<div className='content-container'>
           <Loading />
+          </div>
         )}
       </div>
-    </div>
   );
 };
 

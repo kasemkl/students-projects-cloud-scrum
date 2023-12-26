@@ -3,10 +3,14 @@ import React, { useContext, useState } from 'react';
 import AuthContext from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
+import Dialog from "../componets/Dialog";
+
+
+
 const defaultPhotoUrl = '../images/default_profile_photo.jpg';
 
 const SignUp = () => {
-  const { registerUser } = useContext(AuthContext);
+  const { registerUser ,loginUser} = useContext(AuthContext);
   const [formData, setFormData] = useState({
     university_id: '',
     first_name: '',
@@ -15,7 +19,10 @@ const SignUp = () => {
     profile_photo: null,  
   });
   const [imageSrc, setImageSrc] = useState();
- 
+  const [dialogTitle, setDialogTitle] = useState();
+  const [dialogText, setDialogText] = useState();
+  const [res, setRes] = useState();
+  const [modalShow, setModalShow] = React.useState(false);
 
   const handleInputChange = (e) => {
     const { name, value, files } = e.target;
@@ -35,19 +42,52 @@ const SignUp = () => {
       reader.readAsDataURL(fileInput.files[0]);
     }
   };
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
   
     // Validate that required fields are not empty
     if (!formData.university_id || !formData.first_name || !formData.last_name || !formData.password) {
-      console.log('All fields are required.');
+        console.log('All fields are required.');
+        return;
     }
   
-    // Continue with the registration process
-    registerUser(formData);
-  };
-  
+    try {
+        // Wait for the registerUser promise to resolve
+        const response = await registerUser(formData);
+        const data = await response.json();
+        
+        if (response.status === 201) {
+            console.log(data.message);  // Log the success message
+            setDialogTitle(data.title)
+            setDialogText(data.message)
+            setModalShow(true)
+            setRes(response.status)
+            // if(modalShow==false){
+            // loginUser(formData);}
+        } else if (response.status === 400) {
+            console.log(data.message);// Log the error message
+            setDialogTitle(data.title)
+            setDialogText(data.message)
+            setModalShow(true)
+            setRes(response.status)
+        }
+    } catch (error) {
+        console.error('Error during registration:', error);
+    }
+};
   return (
+    <>
+    <Dialog
+    title={dialogTitle}
+    text={dialogText}
+    show={modalShow}
+    onHide={() => {
+        setModalShow(false);
+        if (res === 201) {
+            loginUser(formData);
+        }
+    }}
+      />
     <form onSubmit={handleRegister} className="sign-up">
       <fieldset>
         <span className="title">Sign Up</span>
@@ -67,7 +107,7 @@ const SignUp = () => {
             placeholder='Enter your university id...'
             value={formData.university_id}
             onChange={handleInputChange}
-          />
+            />
           <i className='bx bxs-id-card'></i>
         </div>
 
@@ -79,7 +119,7 @@ const SignUp = () => {
             placeholder='Enter you first name...'
             value={formData.first_name}
             onChange={handleInputChange}
-          />
+            />
           <i className='bx bxs-user-detail'></i>
         </div>
 
@@ -91,7 +131,7 @@ const SignUp = () => {
             placeholder='Enter your last name...'
             value={formData.last_name}
             onChange={handleInputChange}
-          />
+            />
           <i className='bx bxs-user-detail'></i>
         </div>
 
@@ -104,7 +144,7 @@ const SignUp = () => {
               placeholder='Enter the password...'
               value={formData.password}
               onChange={handleInputChange}
-            />
+              />
             <i className='bx bx-lock-alt'></i>
           </div>
 
@@ -116,7 +156,7 @@ const SignUp = () => {
               placeholder='Enter confirmation password...'
               value={formData.password}
               onChange={handleInputChange}
-            />
+              />
             <i className='bx bx-lock-alt'></i>
           </div>
        
@@ -135,6 +175,7 @@ const SignUp = () => {
         </div>
       </fieldset>
     </form>
+              </>
   );
 };
 

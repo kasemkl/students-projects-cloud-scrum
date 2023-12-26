@@ -1,12 +1,12 @@
 // MyComponent.jsx
 import React, { useEffect, useState } from "react";
-import CardProjects from "./CardProjects";
+import CardProjects from "../componets/CardProjects";
 import "../styles/projectslist.css";
 import axios from "axios";
 import useAxios from "../utils/useAxios";
-import Loading from "./Loading";
+import Loading from "../componets/Loading";
 import NavDropdown from "react-bootstrap/NavDropdown";
-import Dialog from "./Dialog";
+import Dialog from "../componets/Dialog";
 const ProjectsList = () => {
   const [data, setData] = useState([]);
   const [projectsBySupervisor, setProjectsBySupervisor] = useState({});
@@ -20,28 +20,37 @@ const ProjectsList = () => {
   const [departments, setDepartments] = useState([]);
   const [supervisors, setSupervisors] = useState([]);
   const [modalShow, setModalShow] = React.useState(false);
-
+  const [isEmpty,setIsEmpty]=useState()
   let api = useAxios();
   
   useEffect(() => {
     const fetchData = async () => {
-        try{
+      try {
         let response = await api.get("/projects/");
+    
         if (response.status === 200) {
           console.log("projects", response.data);
-          const rawData = response.data;
-          const dataArray = Object.keys(rawData).map((key) => ({
-            id: key,
-            ...rawData[key],
-          }));
-          setData(dataArray);
+    
+          // Check if response.data is an empty object
+          const isEmptyObject = Object.keys(response.data).length === 0;
+    
+          if (isEmptyObject) {
+            setIsEmpty(true);
+          } else {
+            const rawData = response.data;
+            const dataArray = Object.keys(rawData).map((key) => ({
+              id: key,
+              ...rawData[key],
+            }));
+            setData(dataArray);
+            setIsEmpty(false);
+          }
         }
+      } catch (error) {
+        // Handle errors
+        console.error("Error fetching data:", error);
       }
-      catch (error) {
-        console.error('Error fetching requests:', error);
-        setModalShow(true)
-      
-    }}
+    };
     fetchData();
   }, []);
   useEffect(() => {
@@ -230,10 +239,9 @@ const ProjectsList = () => {
         </NavDropdown.Item>
       </NavDropdown>
 
-      <div className={data.length === 0 ? "content-container" : ""}>
-        {data.length > 0 ? renderGroupedProjects() : <Loading />}
+        {data.length > 0 ? renderGroupedProjects() : isEmpty?<div>No projects </div>:<div className="content-container"><Loading /></div>}
       </div>
-    </div>
+   
   );
 };
 

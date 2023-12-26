@@ -19,9 +19,9 @@
 
 }
 .card{
-    display: flex;
+    /* display: flex;
     justify-content: space-between;
-    flex-direction: row;
+    flex-direction: row; */
     width: 100%;
     margin-bottom: 15px;
     border: solid #fff 1px !important;
@@ -36,7 +36,7 @@ strong{
     font-weight: 500;
 }
 
-.buttons{
+.apply-btn{
     display: flex;
     flex-direction: column;
     margin: 10px;
@@ -45,7 +45,14 @@ strong{
     margin: 5px;
     min-width: 40px;
 }
-
+.buttons .button{
+    color:#fff;
+    background-color: #412262;
+}
+.buttons .button:hover{
+    color:#fff;
+    background-color: #65329c;
+}
 .filter{
 display: flex;
 justify-content: flex-end;

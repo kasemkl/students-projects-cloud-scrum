@@ -6,18 +6,21 @@ import useAxios from '../utils/useAxios';
 import AuthContext from '../context/AuthContext';
 import '../styles/addSugg.css'
 import Loading from '../componets/Loading'
+import UserInfoContext from '../context/UserInfoContext';
+import Dialog from './Dialog';
 const RequestForm = () => {
     const navigate = useNavigate(); // Initialize the useHistory hook
     const api=useAxios()
-    let {user}=useContext(AuthContext)
-  const [formData, setFormData] = useState({
-    supervisor_id:user.university_id,
-    supervisor_name:user.first_name,
-    title: '',
-    description: '',
-    goal: '',
-    department: '',
-  });
+    let {userInfo}=useContext(UserInfoContext)
+    const [formData, setFormData] = useState({
+      supervisor_id:userInfo.university_id,
+      supervisor_name:userInfo.first_name + ' '+ userInfo.last_name,
+      title: '',
+      description: '',
+      goal: '',
+      department: '',
+    });
+    // console.log(formData)
   const [touchedFields, setTouchedFields] = useState({
     title: false,
     description: false,
@@ -25,7 +28,11 @@ const RequestForm = () => {
     department: false,
   });
   const [departments, setDepartments] = useState([]);
-
+  const [modalShow, setModalShow] = React.useState(false);
+  const [modalText, setModalText] = useState({
+    title: 'Processing',
+    text: 'please wait a second...'
+  });
   useEffect(() => {
     // Fetch the list of departments
     const fetchData = async () => {
@@ -55,27 +62,29 @@ const RequestForm = () => {
   const handleBlur = (field) => {
     setTouchedFields((prevTouched) => ({ ...prevTouched, [field]: true }));
   };
+
   const isValid = () => {
+    // console.log(formData)
     return Object.keys(formData).every((field) => formData[field] !== '');
   };
+
   const handleSubmit = async(e) => {
     // Make a POST request to the Django API endpoint
     e.preventDefault(); // Prevent the default form submission behavior
-
+    setModalShow(true)
     console.log(formData);
     try{
       let response=await api.post('/requests/',formData)
-      console.log(response.data)
+      setModalText({title:response.data.title,text:response.data.text})
+      setModalShow(true)
       setFormData({
-        supervisor_id:user.university_id,
-        supervisor_name:user.first_name,
+        ...formData,
         title: '',
         description: '',
         goal: '',
         department: '',
     })
-  alert('request is send ')
-  navigate('/sugg-list')
+  
   }
       catch (error) {
           // Handle errors
@@ -85,6 +94,19 @@ const RequestForm = () => {
 
   return (
     <div className='container request'>
+      <Dialog
+        title={modalText.title}
+        text={modalText.text}
+        show={modalShow}
+        onHide={() => {
+          setModalShow(false);
+          navigate('/sugg-list');
+          setModalText({
+            title: 'Processing',
+            text: 'please wait a second...'
+          });
+        }}
+      />
     <div className={departments.length==0 ?'content-container':''}>
       {departments.length >0 ? (
         <form onSubmit={handleSubmit}>
@@ -92,6 +114,7 @@ const RequestForm = () => {
           <div className='field'>
             <label>Title:</label>
             <input
+            className='form-control'
               type="text"
               name="title"
               value={formData.title}
@@ -106,6 +129,7 @@ const RequestForm = () => {
           <div className='field'>
             <label>Description:</label>
             <textarea
+            className='form-control'
               name="description"
               value={formData.description}
               onChange={handleChange}
@@ -119,6 +143,7 @@ const RequestForm = () => {
           <div className='field'>
             <label>Goal:</label>
             <input
+            className='form-control'
               type="text"
               name="goal"
               value={formData.goal}
