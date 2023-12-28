@@ -75,6 +75,7 @@ const RequestForm = () => {
     console.log(formData);
     try{
       let response=await api.post('/requests/',formData)
+      console.log(response.data)
       setModalText({title:response.data.title,text:response.data.text})
       setModalShow(true)
       setFormData({

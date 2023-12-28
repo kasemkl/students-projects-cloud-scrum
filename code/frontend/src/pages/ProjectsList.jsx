@@ -7,6 +7,7 @@ import useAxios from "../utils/useAxios";
 import Loading from "../componets/Loading";
 import NavDropdown from "react-bootstrap/NavDropdown";
 import Dialog from "../componets/Dialog";
+
 const ProjectsList = () => {
   const [data, setData] = useState([]);
   const [projectsBySupervisor, setProjectsBySupervisor] = useState({});
@@ -20,7 +21,7 @@ const ProjectsList = () => {
   const [departments, setDepartments] = useState([]);
   const [supervisors, setSupervisors] = useState([]);
   const [modalShow, setModalShow] = React.useState(false);
-  const [isEmpty,setIsEmpty]=useState()
+  const [isEmpty,setIsEmpty]=useState(false)
   let api = useAxios();
   
   useEffect(() => {
@@ -48,6 +49,7 @@ const ProjectsList = () => {
         }
       } catch (error) {
         // Handle errors
+        setModalShow(true)
         console.error("Error fetching data:", error);
       }
     };

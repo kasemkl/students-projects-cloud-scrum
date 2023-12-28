@@ -15,7 +15,8 @@ const SignUp = () => {
     university_id: '',
     first_name: '',
     last_name: '',
-    password: '',// Corrected property name
+    password: '',
+    confirmation_password:'',// Corrected property name
     profile_photo: null,  
   });
   const [imageSrc, setImageSrc] = useState();
@@ -23,7 +24,11 @@ const SignUp = () => {
   const [dialogText, setDialogText] = useState();
   const [res, setRes] = useState();
   const [modalShow, setModalShow] = React.useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
+ const handleTogglePassword = () => {
+    setShowPassword(!showPassword);
+  };
   const handleInputChange = (e) => {
     const { name, value, files } = e.target;
     const updatedFormData = { ...formData, [name]: files ? files[0] : value };
@@ -77,105 +82,124 @@ const SignUp = () => {
 };
   return (
     <>
-    <Dialog
-    title={dialogTitle}
-    text={dialogText}
-    show={modalShow}
-    onHide={() => {
-        setModalShow(false);
-        if (res === 201) {
+      <Dialog
+        title={dialogTitle}
+        text={dialogText}
+        show={modalShow}
+        onHide={() => {
+          setModalShow(false);
+          if (res === 201) {
             loginUser(formData);
-        }
-    }}
+          }
+        }}
       />
-    <form onSubmit={handleRegister} className="sign-up">
-      <fieldset>
-        <span className="title">Sign Up</span>
-        
-        <div className="avatar avatar-xl">
-                    <img src={imageSrc? imageSrc:require('../images/default_profile_photo.jpg')} alt="..." className="avatar-img rounded-circle" />
-                    <div className="change-photo">
-                        <label className="" for="customFile">Change Photo</label>
-                        <input type="file" className="form-control d-none" id="customFile" onChange={handleImageChange} />
-                    </div>
-                  </div>
-        <div className="field">
-          <label>University ID:</label>
-          <input
-            type="text"
-            name="university_id"
-            placeholder='Enter your university id...'
-            value={formData.university_id}
-            onChange={handleInputChange}
-            />
-          <i className='bx bxs-id-card'></i>
-        </div>
+      <form onSubmit={handleRegister} className="sign-up">
+        <fieldset>
+          <span className="title">Sign Up</span>
 
-        <div className="field">
-          <label>First Name:</label>
-          <input
-            type="text"
-            name="first_name"
-            placeholder='Enter you first name...'
-            value={formData.first_name}
-            onChange={handleInputChange}
+          <div className="avatar avatar-xl">
+            <img
+              src={
+                imageSrc
+                  ? imageSrc
+                  : require("../images/default_profile_photo.jpg")
+              }
+              alt="..."
+              className="avatar-img rounded-circle"
             />
-          <i className='bx bxs-user-detail'></i>
-        </div>
-
-        <div className="field">
-          <label>Last Name:</label>
-          <input
-            type="text"
-            name="last_name"
-            placeholder='Enter your last name...'
-            value={formData.last_name}
-            onChange={handleInputChange}
+            <div className="change-photo">
+              <label className="" for="customFile">
+                Change Photo
+              </label>
+              <input
+                type="file"
+                className="form-control d-none"
+                id="customFile"
+                onChange={handleImageChange}
+              />
+            </div>
+          </div>
+          <div className="field">
+            <label>University ID:</label>
+            <input
+              type="text"
+              name="university_id"
+              placeholder="Enter your university id..."
+              value={formData.university_id}
+              onChange={handleInputChange}
             />
-          <i className='bx bxs-user-detail'></i>
-        </div>
+            <i className="bx bxs-id-card"></i>
+          </div>
 
+          <div className="field">
+            <label>First Name:</label>
+            <input
+              type="text"
+              name="first_name"
+              placeholder="Enter you first name..."
+              value={formData.first_name}
+              onChange={handleInputChange}
+            />
+            <i className="bx bxs-user-detail"></i>
+          </div>
+
+          <div className="field">
+            <label>Last Name:</label>
+            <input
+              type="text"
+              name="last_name"
+              placeholder="Enter your last name..."
+              value={formData.last_name}
+              onChange={handleInputChange}
+            />
+            <i className="bx bxs-user-detail"></i>
+          </div>
 
           <div className="field">
             <label>Password:</label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               name="password"
-              placeholder='Enter the password...'
+              placeholder="Enter the password..."
               value={formData.password}
               onChange={handleInputChange}
-              />
-            <i className='bx bx-lock-alt'></i>
+            />
+            <i className="bx bx-lock-alt"></i>
+            <div className="show-hide" onClick={handleTogglePassword}>
+              {showPassword ? (
+                <i class="bx bx-hide"></i>
+              ) : (
+                <i class="bx bx-show"></i>
+              )}
+            </div>
           </div>
 
           <div className="field">
             <label>Confirmation Password:</label>
             <input
-              type="password"
-              name="password"
-              placeholder='Enter confirmation password...'
-              value={formData.password}
+              type={showPassword ? "text" : "password"}
+              name="confirmation_password"
+              placeholder="Enter confirmation password..."
+              value={formData.confirmation_password}
               onChange={handleInputChange}
-              />
-            <i className='bx bx-lock-alt'></i>
+            />
+            <i className="bx bx-lock-alt"></i>
           </div>
-       
 
-        <div className="field">
-          <button type="submit">Sign up</button>
-        </div>
-        <div class="login-signup">
-          <span class="text">
-            Already a member?
-            <Link to="/login" class="text login-link">
-              {" "}
-              Login Now
-            </Link>
-          </span>
-        </div>
-      </fieldset>
-    </form>
-              </>
+          <div className="field btn">
+            <button type="submit">Sign up</button>
+          </div>
+          <div class="login-signup">
+            <span class="text">
+              Already a member?
+              <Link to="/login" class="text login-link">
+                Login Now
+              </Link>
+            </span>
+          </div>
+        </fieldset>
+      </form>
+    </>
   );
 };
 

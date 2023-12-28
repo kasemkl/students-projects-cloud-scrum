@@ -17,7 +17,7 @@ urlpatterns = [
     path('myrequests/', MyRequestsView.as_view(), name='myrequests'),
     path('delete-requests/', MyRequestDeleteView.as_view(), name='myrequests'),
     path('manager-requests-list/', ManagerRequestsView.as_view(), name='manager-requests-list'),
-    path('notifications/<int:id>/', Notifications.as_view(), name='notifications'),
+    path('notifications/', Notifications.as_view(), name='notifications'),
     path('update-profile/',UpdateProfile.as_view(),name='update-profile'),
     path('user/',UserInfo.as_view(),name='user'),
     path('apply-project/',ApplyProjectView.as_view()),
@@ -25,6 +25,11 @@ urlpatterns = [
     path('check-projects/',Check_if_Apply_project.as_view()),
     path('update-students-requests/',Update_Students_Requests.as_view()),
     path('requests-to-supervisors/',Request_To_Supervisor.as_view()),
+    path('myrequest-student/',MyRequestStudent.as_view()),
+    path('myprojects/',MyProjects.as_view()),
+    path('employee/',Employee.as_view()),
+    path('add-user/',AddUser.as_view()),
+    
     
     
 ]

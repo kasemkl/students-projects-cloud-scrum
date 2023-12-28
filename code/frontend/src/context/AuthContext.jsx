@@ -1,60 +1,58 @@
-import { useContext,useState,useEffect, createContext } from 'react'
-import { jwtDecode } from "jwt-decode";
-import React from 'react'
-import { useNavigate } from 'react-router-dom';
+import { createContext, useState, useEffect } from 'react'
+import { jwtDecode } from 'jwt-decode';
+import { useNavigate } from 'react-router-dom'
+
 const AuthContext = createContext()
 
-export default AuthContext
+export default AuthContext;
 
-export const AuthProvider=({children})=>{
-    
-    const navigate=useNavigate()
+
+export const AuthProvider = ({children}) => {
     let [authTokens, setAuthTokens] = useState(()=> localStorage.getItem('authTokens') ? JSON.parse(localStorage.getItem('authTokens')) : null)
-    let [user, setUser] = useState(()=> authTokens ? jwtDecode(authTokens.access) : null)
-    const [isLoggedIn,setIsLoggedin]=useState(true)
+    let [user, setUser] = useState(()=> localStorage.getItem('authTokens') ? jwtDecode(localStorage.getItem('authTokens')) : null)
     let [loading, setLoading] = useState(true)
+    let [isLoggedIn,setIsLoggedIn]=useState(false)
 
+    const history = useNavigate()
 
-    
-    let loginUser = async (formData) => {
-        try {
-          let response = await fetch('http://127.0.0.1:8000/api/token/', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
+    let loginUser = async (formData )=> {
+
+        let response = await fetch('http://127.0.0.1:8000/api/token/', {
+            method:'POST',
+            headers:{
+                'Content-Type':'application/json'
             },
             body: JSON.stringify({
               'university_id': formData.university_id,
               'password': formData.password,
-            }),
-          });
-      
-          if (response.ok) {
-            let data = await response.json();
-            setAuthTokens(data);
-            setUser(jwtDecode(data.access));
-            localStorage.setItem('authTokens', JSON.stringify(data));
-            console.log(user);
-            
-            navigate('/');
-          } else {
-            console.error(`Error: ${response.status} - ${response.statusText}`);
-            // You may want to provide a more specific error message based on the response
-            alert('Login failed. Please check your credentials.');
-          }
-        } catch (error) {
-          console.error('An unexpected error occurred during login:', error);
-          alert('Something went wrong. Please try again later.');
+            }),        
+          })
+        let data = await response.json()
+        console.log(data)
+        if(response.status === 200){
+            setAuthTokens(data)
+            setUser(jwtDecode(data.access))
+            localStorage.setItem('authTokens', JSON.stringify(data))
+            setIsLoggedIn(true)
+            history('/')
+        }else{
+            alert('Something went wrong!')
         }
-      };
-      
-      
-    let logoutUser = () => {
-        setAuthTokens(null)
-        setUser(null)
-        localStorage.removeItem('authTokens')
-        navigate('/login')
     }
+
+
+    let logoutUser = () => {
+      setAuthTokens(null);
+      setUser(null);
+      setIsLoggedIn(false);
+      localStorage.removeItem('authTokens');
+      history('/login');
+    };
+    
+    useEffect(() => {
+      console.log(user, authTokens, localStorage);
+    }, [user, authTokens]);
+    
 
     let registerUser = async (formData) => {
       try {
@@ -70,102 +68,38 @@ export const AuthProvider=({children})=>{
               method: 'POST',
               body: formDataObj,
           });
+          
       } catch (error) {
+          return error;
           console.error('Error fetching requests:', error);
           // If an error occurs, you might want to reject the promise here
-          return Promise.reject(error);
       }
   };
-    // let registerUser = async (formData) => {
-    //     try {
-    //         const formDataObj = new FormData();
-    //         Object.entries(formData).forEach(([key, value]) => {
-    //             formDataObj.append(key, value);
-    //         });
-    //         console.log('form',formDataObj)
-    //         let response = await fetch('http://127.0.0.1:8000/register/', {
-    //             method: 'POST',
-    //             body: formDataObj,
-    //         });
-    
-    //         let data = await response.json();
-    
-    //         if (response.status === 201) {
-    //             console.log(data)
-    //             loginUser(formData)}
-    //         // } else {
-    //         //     console.log(data, '', response.status);
-    //         // }
-    //       } catch (error) {
-    //         console.error('Error fetching requests:', error);
-    //         return response.data.message;
-    //       }
-    // };
-    
-    // let updateToken = async ()=> {
-    //     console.log('update token ')
-    //     let response = await fetch('http://127.0.0.1:8000/api/token/refresh/', {
-    //         method:'POST',
-    //         headers:{
-    //             'Content-Type':'application/json'
-    //         },
-    //         body:JSON.stringify({'refresh':authTokens?.refresh})
-    //     })
+  useEffect(()=> {
 
-    //     let data = await response.json()
-        
-    //     if (response.status === 200){
-    //         setAuthTokens(data)
-    //         setUser(jwtDecode(data.access))
-    //         localStorage.setItem('authTokens', JSON.stringify(data))
-    //         console.log(data)
-    //     }else{
-    //         logoutUser()
-    //     }
+      if(authTokens){
+          setUser(jwtDecode(authTokens.access))
+      }
+      setLoading(false)
 
-    //     if(loading){
-    //         setLoading(false)
-    //     }
-    // }
-    // useEffect(()=> {
 
-    //     if(loading){
-    //         updateToken()
-    //     }
+  }, [authTokens, loading])
 
-    //     let fourMinutes = 1000 *60*4
-
-    //     let interval =  setInterval(()=> {
-    //         if(authTokens){
-    //             updateToken()
-    //         }
-    //     }, fourMinutes)
-    //     return ()=> clearInterval(interval)
-
-    // }, [authTokens, loading])
-
-    useEffect(()=>{
-
-        if(authTokens){
-            setUser(jwtDecode(authTokens.access))
-        }
-        setLoading(false)
-
-    },[authTokens,loading])
-
-    const contextData={
+    let contextData = {
         user:user,
-        isLoggedIn:isLoggedIn,
         authTokens:authTokens,
-        loginUser:loginUser,
-        logoutUser:logoutUser ,
         setAuthTokens:setAuthTokens,
         setUser:setUser,
-        registerUser:registerUser
-            }
+        registerUser:registerUser,
+        loginUser:loginUser,
+        logoutUser:logoutUser,
+    }
+
+
+
     return(
-        <AuthContext.Provider value={contextData}>
-            {children}
+        <AuthContext.Provider value={contextData} >
+            {loading  ? null : children}
         </AuthContext.Provider>
     )
 }

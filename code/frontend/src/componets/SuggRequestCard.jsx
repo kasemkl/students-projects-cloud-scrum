@@ -65,7 +65,6 @@ const SuggRequestCard = ({request}) => {
           }}
         />
       <div className="card">
-        hello
                   <div className="card-body">
                     <h3 className="card-title">{title}</h3>
                     <p className="card-text">

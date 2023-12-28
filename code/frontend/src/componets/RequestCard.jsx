@@ -4,7 +4,7 @@ import useAxios from '../utils/useAxios';
 import UserInfoContext from '../context/UserInfoContext';
 import RenderContext from '../context/RenderContext';
 
-const Card = ({ formData }) => {
+const RequestCard = ({ formData }) => {
   let { userInfo } = useContext(UserInfoContext);
   let {render,setRender}=useContext(RenderContext)
   let api = useAxios();
@@ -188,4 +188,4 @@ const Card = ({ formData }) => {
   );
 };
 
-export default Card;
+export default RequestCard;

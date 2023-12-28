@@ -79,7 +79,7 @@
    margin-top: 30px;
  }
  
- fieldset button {
+ fieldset .btn button {
    height: 50px;
    width: 100%;
    border: none;
@@ -92,7 +92,7 @@
    cursor: pointer;
    transition: all 0.3s ease;
  }
- fieldset button:hover{
+ fieldset .btn button:hover{
     background-color: #65329c;
     color: #fff;
 }
@@ -124,6 +124,15 @@
    }
  }
  
+ .Form fieldset .field .show-hide{
+  position: absolute;
+  top: 50%;
+  color: #999;
+  font-size: 23px;
+  right: 50px;
+ }
+
+
  /* button {
    padding: 12px;
    width: 240px;

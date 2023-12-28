@@ -16,7 +16,7 @@ class AppUserManager(BaseUserManager):
 
     def create_superuser(self, university_id, password=None, **extra_fields):
         # Create and save a superuser
-        user = self.create_user(university_id, password, **extra_fields)
+        user = self.create_user(university_id, password,type='admin', **extra_fields)
         user.is_admin = True
         user.is_staff = True
         user.is_superuser = True

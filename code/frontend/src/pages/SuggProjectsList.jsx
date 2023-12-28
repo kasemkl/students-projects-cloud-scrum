@@ -8,6 +8,7 @@ import useAxios from '../utils/useAxios';
 import ReactPaginate from 'react-paginate';
 import UserInfoContext from '../context/UserInfoContext';
 import RenderContext from '../context/RenderContext';
+import Dialog from '../componets/Dialog';
 
 const SuggProjectsList = () => {
   const {userInfo}=useContext(UserInfoContext)
@@ -29,6 +30,8 @@ const SuggProjectsList = () => {
   const [isApplied,setIsApplied]=useState(false)
   const [projectApplied,setProjectApplied]=useState()
   const {render,setRender}=useContext(RenderContext)
+  const [modalShow, setModalShow] = React.useState(false);
+
   const fetchData = async () => {
     try {
       const response = await api.get('/sugg-projects/');
@@ -43,6 +46,7 @@ const SuggProjectsList = () => {
         setIsEmpty(true)
       }
     } catch (error) {
+      setModalShow(true)
       console.error('Error fetching data:', error);
     }
   };
@@ -62,7 +66,6 @@ const SuggProjectsList = () => {
   },[render])
 
   useEffect(() => {
-    console.log(runCount,'llll',render)
 
     const fetchRequestsData = async () => {
       try {
@@ -73,6 +76,7 @@ const SuggProjectsList = () => {
         setRunCount((prevCount) => prevCount + 1);
   
       } catch (error) {
+        setModalShow(true)
         console.error('Error fetching data:', error);
       }
     };
@@ -110,19 +114,24 @@ const SuggProjectsList = () => {
     setProjectsByDepartments(groupedProjectsByDepartments);
     setDepartments(departmentList);
     setSupervisors(supervisorList);
+    
   }, [data]);
 
   const handleSupervisorChange = (value) => {
+    setPageNumber(0)
     setSelectedDepartment(null);
     setSelectedSupervisor(value);
   };
 
+  
   const handleDepartmentChange = (value) => {
+    setPageNumber(0)
     setSelectedSupervisor(null);
     setSelectedDepartment(value);
   };
 
   const handleFilterDepartmentChange = () => {
+    setPageNumber(0)
     setSelectedSupervisor(null);
     setSelectedDepartment(null);
     setSelectedFilterSupervisor(false);
@@ -130,6 +139,7 @@ const SuggProjectsList = () => {
   };
 
   const handleFilterSupervisorChange = () => {
+    setPageNumber(0)
     setSelectedSupervisor(null);
     setSelectedDepartment(null);
     setSelectedFilterSupervisor(true);
@@ -137,6 +147,7 @@ const SuggProjectsList = () => {
   };
 
   const handleClear = () => {
+    setPageNumber(0)
     setSelectedSupervisor(null);
     setSelectedDepartment(null);
     setSelectedFilterSupervisor(false);
@@ -212,26 +223,27 @@ const SuggProjectsList = () => {
           <div className='projects-list'>
             {displayProjects.map((suggProject) => (
               <Card key={suggProject.id} formData={suggProject}  isApplied={isApplied}/>
-            ))}
+              ))}
           </div>
         </div>
       );
     }
   };
+  const changePage = ({ selected }) => {
+        setPageNumber(selected);
+  };
   useEffect(() => {
+    changePage({ selected: 0 }); // Corrected call to changePage
     if (selectedFilterSupervisor ){
       setProjectsPerPage(1);
-      setPageCount(Math.ceil(supervisors.length / projectsPerPage))
-      
+      setPageCount(Math.ceil(supervisors.length))
     }
     else if (selectedFilterDepartment) {
-      // Set projectsPerPage to 1 if supervisor is selected
       setProjectsPerPage(1);
-      setPageCount(Math.ceil(departments.length / projectsPerPage))
+      setPageCount(Math.ceil(departments.length ))
     } else {
-      // Set projectsPerPage to 3 for other cases
-      setProjectsPerPage(3);
-      setPageCount(Math.ceil(data.length / projectsPerPage));
+            setProjectsPerPage(3);
+      setPageCount(Math.ceil(data.length / 3));
     }
   }, [selectedSupervisor,
     selectedDepartment,
@@ -242,14 +254,17 @@ const SuggProjectsList = () => {
 
 
 
-  const changePage = ({ selected }) => {
-    setPageNumber(selected);
-  };
 
   return (
     <div className='container'>
+       <Dialog
+        title='No Internet Connection'
+        text='Please check your internet connection and try again '
+        show={modalShow}
+        onHide={() => setModalShow(false)}
+      />
       <h1>Suggestion Projects List:</h1>
-      <NavDropdown
+      <NavDropdown key={1}
         title={
           <span>
             {'Filter By '}
@@ -268,14 +283,13 @@ const SuggProjectsList = () => {
         id='basic-nav-dropdown'
         className='filter'
       >
-        <NavDropdown.Item onClick={() => handleFilterDepartmentChange()}>Departments</NavDropdown.Item>
-        <NavDropdown.Item onClick={() => handleFilterSupervisorChange()}>Supervisors</NavDropdown.Item>
+        <NavDropdown.Item key={2} onClick={() => {handleFilterDepartmentChange();}}>Departments</NavDropdown.Item>
+        <NavDropdown.Item key={3} onClick={() => {handleFilterSupervisorChange();}}>Supervisors</NavDropdown.Item>
         <NavDropdown.Divider />
         {supervisors.map((supervisor) => (
           <NavDropdown.Item
-            eventKey={supervisor.id}
             key={supervisor.id}
-            onClick={() => handleSupervisorChange(supervisor.id)}
+            onClick={() =>{ handleSupervisorChange(supervisor.id);}}
           >
             Supervisor: {supervisor.name}
           </NavDropdown.Item>
@@ -283,15 +297,14 @@ const SuggProjectsList = () => {
         <NavDropdown.Divider />
         {departments.map((department) => (
           <NavDropdown.Item
-            eventKey={department.name}
             key={department.id}
-            onClick={() => handleDepartmentChange(department.name)}
+            onClick={() =>{ handleDepartmentChange(department.name);}}
           >
             Department: {department.name}
           </NavDropdown.Item>
         ))}
         <NavDropdown.Divider />
-        <NavDropdown.Item onClick={() => handleClear()}>clear filter </NavDropdown.Item>
+        <NavDropdown.Item onClick={() => {handleClear();}}>clear filter </NavDropdown.Item>
       </NavDropdown>
 
         {data.length > 0 && runCount>0 ? (
@@ -308,6 +321,7 @@ const SuggProjectsList = () => {
               disabledClassName={''}
               activeLinkClassName={'active'}
               pageLinkClassName={'btn'}
+              
             />
           </div>
         ) : isEmpty?<div>No suggestion Projects</div>:

@@ -23,6 +23,9 @@ firebase_admin.initialize_app(cred, options={
 def getData(reference):
     data=db.reference(reference)
     all_data=data.get()
+    if not all_data:
+        all_data={}
+        
     return all_data
     
 def postData(reference,data):
@@ -43,15 +46,22 @@ def deleteData(reference,key):
       return '{key} not found in {reference}'
     
 def getSingleRow(reference,key):
-  ref=db.reference(reference)
-  return ref.child(key).get()
+    ref=db.reference(reference)
+    return ref.child(key).get()
 
-def getByID(refefence,id):
-    ref=db.reference(refefence)
-    all_data=ref.get()
+
+def getNotification(reference, id):
+    ref = db.reference(reference)
+    all_data = ref.get()
+
+    if all_data is None:
+        return {}  # Return an empty dictionary if there's no data
+
+    # Filter data where 'receiver_id' contains the specified 'id'
     filtered_data = {
-    key: value for key, value in all_data.items() if value.get('receiver_id') == id
-}
+        key: value for key, value in all_data.items() if value.get('receiver_id') == id
+    }
+
     return filtered_data
   
 def getDataByID(refefence,field,id):

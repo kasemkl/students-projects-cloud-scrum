@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   MDBCard,
   MDBCardBody,
@@ -7,10 +7,13 @@ import {
   MDBCardText,
   MDBCardLink
 } from 'mdb-react-ui-kit';
+import UserInfoContext from '../context/UserInfoContext';
 
 
 const CardProjects = ({ formData }) => {
   const { title, description, goal, department,date,supervisor_name ,students,project_type} = formData;
+  const {userInfo}=useContext(UserInfoContext)
+
   return (
     <div className="card" >
       <div className="card-body">
@@ -23,6 +26,8 @@ const CardProjects = ({ formData }) => {
         <p className="card-text">
             <span>Students:</span>
             {Object.entries(students).map(([ID, student]) => (
+              userInfo.type==="employee"?
+                <p className='info'> ID :{ID} , Name :{student.name} </p>:
                 <span className='info'> {student.name} </span>
               
             ))}

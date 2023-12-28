@@ -75,14 +75,14 @@ return (
             {Object.entries(students).map(([ID, student]) => (
               <p key={ID}>
                 <span className='info'>ID: {ID}, name: {student.name},</span>
-                {!userInfo.groups.includes('supervisor')? 
+                {!userInfo.type==='supervisor'? 
                 <span className='status'>Status: <span className={`${student.status}`}>{student.status}</span></span>:''}
-                {userInfo.groups.includes('supervisor')? 
+                {userInfo.type==='supervisor'? 
                 <span className='status'>GPA: <span>{student.GPA}</span></span>:''}
               </p>
             ))}
           </p>
-          {!userInfo.groups.includes('supervisor') && (
+          {!userInfo.type==='supervisor' && (
             <p className="card-text">
               <span>Supervisor:</span> {supervisor_id}
             </p>
@@ -90,7 +90,7 @@ return (
           <p className="card-text">
               <span>Project type:</span> {project_type}
             </p>
-          {(userInfo.type === 'student' && userStatus === 'pending'|| userInfo.groups.includes('supervisor'))  && (
+          {(userInfo.type === 'student' && userStatus === 'pending'|| userInfo.type==='supervisor' || userInfo.type==='manager')  && (
             <div className="buttons">
               <button className="btn btn-success" onClick={() => handleResponse('accept')}>
                 Accept

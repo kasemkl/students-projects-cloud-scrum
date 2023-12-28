@@ -10,8 +10,10 @@ const UserInfoContext=createContext()
 export default UserInfoContext; 
 
 export  const UserInfoProvider=({children})=>{
-    const {user,authtokens,loginUser,logoutUser}=useContext(AuthContext)
-    const api=useAxios()
+  const {user,authtokens,loginUser,logoutUser,removeInfo,isLoggedIn}=useContext(AuthContext)
+  const [isEmpty,setIsEmpty]=useState(false)
+  const api=useAxios()
+  const [notifications,setNotifications]=useState([])
     const [userInfo,setUserInfo]=useState({
       university_id:'',
       first_name:'',
@@ -21,7 +23,10 @@ export  const UserInfoProvider=({children})=>{
       groups:[],
       profile_photo:''
     })
+
+console.log('user',user)
     const [load,setLoad]=useState(true)
+
     useEffect(() => {
         const fetchData = async () => {
           try {
@@ -32,15 +37,16 @@ export  const UserInfoProvider=({children})=>{
                 profile_photo: `http://127.0.0.1:8000${response.data.profile_photo}`,
               };
               setUserInfo(completeUserInfo);
-              console.log(userInfo)
             }
           } catch (error) {
             console.error('Error fetching requests:', error);
           }
         };
-    
+        if(user)
         fetchData();
-      }, [load,authtokens,logoutUser,loginUser]);
+      }, [user]);
+
+      console.log(userInfo)
 
       const updateUserInfo= async(formData)=>{
                 try {
@@ -64,9 +70,66 @@ export  const UserInfoProvider=({children})=>{
         }
       }
 
+
+
+      useEffect(() => {
+          // Fetch the list of departments
+
+            const fetchNotifications = async () => {
+            try {
+              console.log(user)
+                const response = await api.get(`/notifications/`);
+                if (response.status === 200) {
+              const rawData=response.data
+            const dataArray = Object.keys(rawData).map(key => ({
+              id: key,
+              ...rawData[key],
+            }));
+
+            dataArray.reverse()
+            console.log(dataArray.length)
+            setNotifications(dataArray)
+            if(dataArray.length === 0 ){
+              setIsEmpty(true)
+          }
+      
+
+                }
+            } catch (error) {
+                console.error('Error fetching requests:', error);
+            }
+        };
+        if(user)
+        fetchNotifications();
+        const timerId = setInterval(() => {
+          if(user)
+          fetchNotifications();
+        }, 10000);
+    
+        // Clean up the interval when the component is unmounted
+        return () => clearInterval(timerId);
+        }, [user]);
+
+useEffect(()=>{
+  if(!isLoggedIn){
+  setUserInfo({
+    university_id:'',
+    first_name:'',
+    last_name:'',
+    email:'',
+    type:'',
+    groups:[],
+    profile_photo:''
+  })
+  setNotifications([])
+}
+},[user])
 const Data={
     userInfo:userInfo,
-    updateUserInfo:updateUserInfo
+    notifications:notifications,
+    isEmpty:isEmpty,
+    updateUserInfo:updateUserInfo,
+    setUserInfo:setUserInfo
 }
 return (
     <UserInfoContext.Provider value={Data}>

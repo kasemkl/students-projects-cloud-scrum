@@ -65,3 +65,16 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
     def get_groups(self, obj):
         return obj.groups.values_list('name', flat=True)
+    
+    
+class AddUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = ['university_id', 'password', 'first_name', 'last_name', 'type']
+
+    def create(self, validated_data):
+        try:
+            user = Account.objects.create_user(**validated_data)
+            return user
+        except Exception as e:
+            raise ValidationError({'message': str(e)})

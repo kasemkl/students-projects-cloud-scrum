@@ -4,15 +4,20 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .permissions import IsManager, IsSupervisor
-from .firebase import getData, getSingleRow, postData, deleteData,getByID,Logging,getDataByID,editDataByID,addStudentRequest,check_if_apply_projects,get_user_projects,get_supervisor_projects
+from .firebase import getData, getSingleRow, postData, deleteData,getNotification,Logging,getDataByID,editDataByID,addStudentRequest,check_if_apply_projects,get_user_projects,get_supervisor_projects
 from .validition import validateRequestsData
 from .serilizers import *  # Make sure to import your serializers
 from rest_framework.parsers import MultiPartParser, FormParser
 from datetime import datetime
 from django.contrib.auth.hashers import check_password
 
-current_date_time = datetime.now()
-date=current_date_time.strftime('%Y/%m/%d %I:%M%p')
+from datetime import datetime
+import pytz
+
+# Get the GMT+3 timezone
+gmt_plus_3_tz = pytz.timezone('Etc/GMT-3')
+current_date_time = datetime.now(gmt_plus_3_tz)
+date = current_date_time.strftime('%Y/%m/%d %I:%M%p')
 
 
 class UserRegister(APIView):
@@ -22,11 +27,16 @@ class UserRegister(APIView):
         university_id = request.data['university_id']
         first_name=request.data['first_name']
         last_name=request.data['last_name']
+        password=request.data.get('password')
+        confirmation_password=request.data.get('confirmation_password')
+        if password != confirmation_password:
+            return Response({'title':'Failed Registration','message': 'password and confirmation password doesnt match'}, status=status.HTTP_400_BAD_REQUEST)
+
         user_exists = University_students.objects.filter(pk=university_id).exists()
         if not user_exists:
             return Response({'title':'Invalid University ID','message': 'This university id doesnt belong to university please check your university id and try again'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        if first_name !=user_exists.first_name or last_name !=user_exists.last_name:
+        user=University_students.objects.get(pk=university_id)
+        if first_name !=user.first_name or last_name !=user.last_name:
             return Response({'title':'Invalid University ID','message': 'The first name or last name does not match with university id .'}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
@@ -55,6 +65,8 @@ class UserRegister(APIView):
                 return Response({'message': serializer.errors})
         except Exception as e:
             return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            
             
 class DepartmentView(APIView):
     permission_classes = [IsAuthenticated]
@@ -152,11 +164,26 @@ class RequestsView(APIView):
     def post(self, request):
         reference = 'requests'
         user=request.user.university_id
+        user_name=request.user.first_name+ ' ' +request.user.last_name
+        
+        
+        manager = Account.objects.filter(type='manager').first()
+        
         try:
             if validateRequestsData(request.data):
+                if request.user.groups.filter(name='manager').exists():
+                    postData('suggestion_projects', request.data)
+                    return Response({'title':'Request Sent','text': "the suggestion project is added successfully."}, status=status.HTTP_201_CREATED)
                 data = postData(reference, request.data)
                 Logging({'action':f"user with university ID={user} Add new Suggestion project request with title={request.data.get('title')}",
                         'data':data,'date':date})
+
+                notication={
+                    'message':f'{user_name} sent a suggestion project request ',
+                    'receiver_id':manager.university_id,
+                    'date':date
+                }
+                postData('notifications',notication)
                 return Response({'title':'Request Sent','text': "the request has sent to manager succesfully."}, status=status.HTTP_201_CREATED)
             else:
                 return Response({'title':'ERROR','text': "the request has missing fields"}, status=status.HTTP_400_BAD_REQUEST)
@@ -176,7 +203,6 @@ class ManagerRequestsView(APIView):
         reference = 'requests'
         request_id = request.data.get('id')
         decision = request.data.get('status')
-        sender=request.data.get('user_name')
         user=request.user.university_id
         try:
             request_instance = getSingleRow('requests', request_id)
@@ -188,10 +214,10 @@ class ManagerRequestsView(APIView):
                 if validateRequestsData(request_instance):
                     data=postData('suggestion_projects', request_instance)
                     notification={'message':'Your suggestions is approved by the manager',
-                                'sender':sender,
                                 'receiver_id':int(request_instance['supervisor_id']),
                                 'date':date}
                     postData('notifications',notification)
+                    
                     Logging({"action":f"user with university ID={user} accept Suggestion project request with title={request.data.get('title')}",
                             'data':data,'date':date})
                     deleteData('requests', request_id)
@@ -206,6 +232,10 @@ class ManagerRequestsView(APIView):
             else:
                 
                 deleteData('requests', request_id)
+                notification={'message':'Your suggestions is approved by the manager',
+                                'receiver_id':int(request_instance['supervisor_id']),
+                                'date':date}
+                postData('notifications',notification)
                 return Response({'title': 'Request Deleted',
                                 'text': 'Request deleted successfully.'},
                                 status=status.HTTP_200_OK)
@@ -213,15 +243,16 @@ class ManagerRequestsView(APIView):
             error_message = str(e)
             return Response({"error": error_message})
 
-        return Response(request_instance)
 
 class Notifications(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self,request,id):
+    def get(self,request):
         reference='notifications'
-        data=getByID(reference,id)
-        return Response(data)
+        user=request.user.university_id
+        
+        data=getNotification(reference,user)
+        return Response(data,status=status.HTTP_200_OK)
     
 
 class UpdateProfile(APIView):
@@ -247,6 +278,10 @@ class UpdateProfile(APIView):
                 
         request.user.save()
         Logging({"action":f"user with university ID={user} update his profile data",'date':date})
+        notification={'message':'Your profile has been updated',
+                                'receiver_id':int(request.user.university_id),
+                                'date':date}
+        postData('notifications',notification)
         return Response({'message': 'Profile updated successfully'}, status=status.HTTP_200_OK)
 
 
@@ -343,24 +378,30 @@ class ApplyProjectView(APIView):
                     
                 data['students']=students_obj
                 postData('requests_to_supervisors',data)
+                notification={'message':f'{request.user.first_name} sent you a request',
+                                'receiver_id':int(data['supervisor_id']),
+                                'date':date}
+                postData('notifications',notification)
                 return Response({'title': 'Application sent',
                         'text': 'Your application sent successfully. '},
                         status=status.HTTP_201_CREATED)
         # return Response(students)
-        send = addStudentRequest(data)
+        addStudentRequest(data)
+        notification={'message':f'{request.user.first_name} sent you a request',
+                                'receiver_id':int(data['supervisor_id']),
+                                'date':date}
+        postData('notifications',notification)
         return Response({'title': 'Application sent',
                         'text': 'Your application sent successfully. '},
                         status=status.HTTP_201_CREATED)
-
-        return Response('request send')
     
 class StudentsRequests(APIView):
     permission_classes=[IsAuthenticated]
     def get(self,request):
         user=request.user.university_id
         data=get_user_projects('students_requests',user)
-        # data=getData('students_requests')
         return Response(data,status=status.HTTP_200_OK)
+    
     
 class Check_if_Apply_project(APIView):
     permission_classes=[IsAuthenticated]
@@ -376,6 +417,7 @@ class Check_if_Apply_project(APIView):
         if respone:
             return Response({'applied':respone})
         return Response({'applied':False})
+
 
 class Update_Students_Requests(APIView):
     permission_classes=[IsAuthenticated]
@@ -409,17 +451,27 @@ class Update_Students_Requests(APIView):
                                 'text': 'Application deleted successfully.'},
                                 status=status.HTTP_200_OK)
 class Request_To_Supervisor(APIView):
-    permission_classes=[IsSupervisor]
+    permission_classes=[IsSupervisor|IsManager]
     def get(self,request):
+        
         data=get_supervisor_projects('requests_to_supervisors',request.user.university_id)
         return Response(data)
     
     def post(self,request):
         response=request.data.get('response')
         request_id=request.data.get('request_id')
-        
+        students_obj=getSingleRow('requests_to_supervisors',request_id).get('students')
+        students=[]
+        for id,info in students_obj.items():
+            students.append(int(id))
+            
         if response=='delete':
             result=deleteData('requests_to_supervisors',request_id)
+            for student in students:
+                notification={'message':f'{request.user.first_name} reject your request',
+                                    'receiver_id':int(student),
+                                    'date':date}
+                postData('notifications',notification)
             return Response({'title': 'Application Deleted',
                                 'text': 'Application deleted successfully.'},
                                 status=status.HTTP_200_OK)
@@ -429,15 +481,124 @@ class Request_To_Supervisor(APIView):
             sugg_project_id=request_data.get('project_id')
             sugg_project=getSingleRow('suggestion_projects',sugg_project_id)
             project=sugg_project
+            project['sugg_project']=sugg_project_id
+            
             students=request_data.get('students')
             for student_data in students.values():
                     student_data.pop("GPA", None)
+            
             project['students']=students
             project['project_type']=request_data.get('project_type')
             project['date']=current_date_time.strftime('%Y/%m/%d')
-            postData('projects',project)
-            deleteData('suggestion_projects',sugg_project_id)
+            postData('employee',project)
             deleteData('requests_to_supervisors',request_id)
+            
+            employee = Account.objects.filter(type='employee').first()
+
+            notification={'message':f'{request.user.first_name} send project to registe ',
+                                    'receiver_id':employee.university_id,
+                                    'date':date}
+            postData('notifications',notification)
+            for student in students:
+                notification={'message':f'{request.user.first_name} accept your request',
+                                    'receiver_id':int(student),
+                                    'date':date}
+                postData('notifications',notification)
             return Response({'title': 'Application Approved',
                                 'text': 'Your response sent successfully and the project is approved.'},
                                 status=status.HTTP_200_OK)
+            
+            
+class MyRequestStudent(APIView):
+    
+    def get(self,request):
+        user=request.user.university_id
+        data=get_user_projects('requests_to_supervisors',user)
+        return Response(data,status=status.HTTP_200_OK)
+    
+class MyProjects(APIView):
+    
+    def get(self,request):
+        user=request.user.university_id
+        type=request.user.type
+        if type=='student':
+            data=get_user_projects('projects',user)
+        else:
+            data=get_supervisor_projects('projects',user)
+            
+        return Response(data,status=status.HTTP_200_OK)
+
+class Employee(APIView):
+    
+    def get(self,request):
+        data=getData('employee')
+        return Response(data,status=status.HTTP_200_OK)
+    
+    def post(self,request):
+        respone=request.data.get('response')
+        project_id=request.data.get('id')
+        project=getSingleRow('employee',project_id)
+        sugg_project_id=project.get('sugg_project') 
+        students_obj=project.get('students')
+        students=[]
+        for id,info in students_obj.items():
+                students.append(int(id))
+        if respone=='success':
+            postData('projects',project)
+            deleteData('suggestion_projects',sugg_project_id)
+            deleteData('employee',project_id)
+            for student in students:
+                notification={'message':f'{request.user.first_name} registe your project successfully.',
+                                    'receiver_id':int(student),
+                                    'date':date}
+                postData('notifications',notification)
+                return Response({'title': 'Project Approved',
+                                'text': 'Your response sent successfully and the project is approved.'},
+                                status=status.HTTP_200_OK)
+        elif respone=='failed':
+            deleteData('employee',project_id)
+            for student in students:
+                notification={'message':f'Your project register failed please check your info with {request.user.first_name} {request.user.last_name}.',
+                                    'receiver_id':int(student),
+                                    'date':date}
+                postData('notifications',notification)
+                return Response({'title': 'Project deleted',
+                                'text': 'Your response sent successfully and the project is deleted.'},
+                                status=status.HTTP_200_OK)
+                
+
+class AddUser(APIView):
+    # parser_classes = (MultiPartParser, FormParser)
+
+    def post(self, request):
+        password=request.data.get('password')
+        confirmation_password=request.data.get('confirmation_password')
+        if password != confirmation_password:
+            return Response({'title':'Failed Registration','text': 'password and confirmation password doesnt match'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            clean_data = {
+                            'university_id': request.data['university_id'],
+                            'first_name': request.data['first_name'],
+                            'last_name': request.data['last_name'],
+                            'type':request.data['type'],
+                            'password': request.data['password'],
+                        }
+
+            serializer = AddUserSerializer(data=clean_data)
+            if serializer.is_valid():
+                instance = serializer.save()
+
+                # Handle file upload
+                Logging({'action':f"Register new account with university ID={clean_data['university_id']} and first_name={clean_data['first_name']}",'date':date})
+                return Response({'title':'Successful Registration','text': 'Account Created Successfuly'}, status=status.HTTP_201_CREATED)
+            else:
+                # Access the 'detail' attribute, not 'error_list'
+                errors = []
+                for field, field_errors in serializer.errors.items():
+                        for error in field_errors:
+                            errors.append(f"{field}: {error}")
+
+                return Response({'title': 'Failed', 'text': ', '.join(errors)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

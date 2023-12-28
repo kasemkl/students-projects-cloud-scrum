@@ -17,6 +17,10 @@ import Myrequests from './pages/Myrequests';
 import { RenderProvider } from './context/RenderContext';
 import Inbox from './pages/Inbox';
 import SupervisorInbox from './pages/SupervisorInbox';
+import MyProject from './pages/MyProject';
+import Notifications from './pages/Notifications';
+import Employee from './pages/Employee';
+import AddUser from './pages/AddUser';
 
 function App() {
   const location = useLocation();
@@ -50,6 +54,10 @@ function App() {
           <Route path='/my-requests' element={<PrivateRoute element={<Myrequests/>} />}/> 
           <Route path='/inbox' element={<PrivateRoute element={<Inbox/>} />}/> 
           <Route path='/supervisor-inbox' element={<PrivateRoute element={<SupervisorInbox/>}/>} /> 
+          <Route path='/my-projects' element={<PrivateRoute element={<MyProject/>}/>} /> 
+          <Route path='/notifications' element={<PrivateRoute element={<Notifications/>}/>} /> 
+          <Route path='/employee' element={<PrivateRoute element={<Employee/>}/>} /> 
+          <Route path='/add-user' element={<PrivateRoute element={<AddUser/>}/>} /> 
           
         </Routes>
         </div>

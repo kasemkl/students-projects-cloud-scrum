@@ -77,6 +77,8 @@ const Card = ({ formData, isApplied }) => {
     const formData = {
       project_id: id,
       title: title,
+      supervisor_name:supervisor_name,
+      department:department,
       supervisor_id: supervisor_id,
       students: students, // IDs only
       project_type:project_type 
