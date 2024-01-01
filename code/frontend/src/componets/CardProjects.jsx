@@ -22,13 +22,13 @@ const CardProjects = ({ formData }) => {
         <p className="card-text"><span>Description:</span> {description}</p>
         <p className="card-text"><span>Goal:</span> {goal}</p>
         <p className="card-text"><span>Department:</span> {department}</p>
-        <p className="card-text"><span>Supervisor:</span> {supervisor_name }</p>
+        <p className="card-text"><span>Supervisor:</span> Dr.{supervisor_name }</p>
         <p className="card-text">
             <span>Students:</span>
             {Object.entries(students).map(([ID, student]) => (
-              userInfo.type==="employee"?
+              userInfo.groups.includes("employee")?
                 <p className='info'> ID :{ID} , Name :{student.name} </p>:
-                <span className='info'> {student.name} </span>
+                <p className='info'> {student.name} </p>
               
             ))}
           </p>

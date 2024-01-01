@@ -14,7 +14,7 @@ import ConfirmDialog from './ConfirmDialog';
 import RenderContext from '../context/RenderContext';
 
 
-const EmployeeCard = ({ formData }) => {
+const EmployeeCard = ({ formData ,reload,setReload}) => {
   const { id,title, description, goal, department,date,supervisor_name ,students,project_type} = formData;
   const {userInfo}=useContext(UserInfoContext)
   const api=useAxios()
@@ -50,7 +50,7 @@ const handleResponse = async (response) => {
         text={modalText.text}
         show={modalShow}
         onHide={() => {
-            setRender(!render);
+            setReload(!reload);
             setModalShow(false);
             setModalText({
                 title: 'Checking Info',
@@ -78,7 +78,7 @@ const handleResponse = async (response) => {
         <p className="card-text"><span>Description:</span> {description}</p>
         <p className="card-text"><span>Goal:</span> {goal}</p>
         <p className="card-text"><span>Department:</span> {department}</p>
-        <p className="card-text"><span>Supervisor:</span> {supervisor_name }</p>
+        <p className="card-text"><span>Supervisor:</span> Dr.{supervisor_name }</p>
         <p className="card-text">
             <span>Students:</span>
             {Object.entries(students).map(([ID, student]) => (
@@ -94,10 +94,10 @@ const handleResponse = async (response) => {
         <p className="card-text"><span>Date:</span> {date}</p>
         <div className="buttons">
               <button className="btn btn-success" onClick={() => handleResponse('success')}>
-                Accept
+                Success
               </button>
               <button className="btn btn-danger" onClick={() => setModalConfirmShow(true)}>
-                Delete
+                Failed
               </button>
             </div>
         </div>

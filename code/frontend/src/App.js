@@ -21,6 +21,7 @@ import MyProject from './pages/MyProject';
 import Notifications from './pages/Notifications';
 import Employee from './pages/Employee';
 import AddUser from './pages/AddUser';
+import AddProjectRequest from './pages/AddProjectRequest';
 
 function App() {
   const location = useLocation();
@@ -58,6 +59,7 @@ function App() {
           <Route path='/notifications' element={<PrivateRoute element={<Notifications/>}/>} /> 
           <Route path='/employee' element={<PrivateRoute element={<Employee/>}/>} /> 
           <Route path='/add-user' element={<PrivateRoute element={<AddUser/>}/>} /> 
+          <Route path='/add-project-request' element={<PrivateRoute element={<AddProjectRequest/>}/>} /> 
           
         </Routes>
         </div>

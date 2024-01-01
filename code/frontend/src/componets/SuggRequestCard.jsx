@@ -77,7 +77,7 @@ const SuggRequestCard = ({request}) => {
                       <strong>department:</strong> {department}
                     </p>
                     <p className="card-text">
-                      <strong>supervisor:</strong> {supervisor_name}
+                      <strong>supervisor:</strong> Dr.{supervisor_name}
                     </p>
                   </div>
                   <div className="">

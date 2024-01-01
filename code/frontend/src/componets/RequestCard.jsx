@@ -161,7 +161,7 @@ const RequestCard = ({ formData }) => {
         )}
       </div>
       <div className="buttons">
-        {userInfo.type === 'student' && !isEditing && (
+        {userInfo.groups.includes("student") && !isEditing && (
           <Link to="#" className="btn button">
             Apply
           </Link>

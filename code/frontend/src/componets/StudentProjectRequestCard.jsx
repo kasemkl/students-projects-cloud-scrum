@@ -5,9 +5,9 @@ import Dialog from './Dialog';
 import ConfirmDialog from './ConfirmDialog';
 import RenderContext from '../context/RenderContext';
 
-const MessageCard = ({ request_id, project ,url}) => {
+const StudentProjectRequestCard = ({ request_id, project ,url}) => {
   
-  const { project_id, students, supervisor_name, title ,project_type} = project;
+  const { project_id, students, supervisor_name, title ,project_type,description,department,goal} = project;
     const api=useAxios()
     const {userInfo}=useContext(UserInfoContext)
     const [userStatus,setUserStatus]=useState()
@@ -70,6 +70,17 @@ return (
       <div className="card-body">
         <h3 className="card-title">{title}</h3>
         <div className="card-content">
+       
+        <p className="card-text">
+              <span>Description:</span> {description}
+            </p>
+            <p className="card-text">
+              <span>goal:</span> {goal}
+            </p>
+            <p className="card-text">
+              <span>department:</span> {department}
+            </p>
+            
           <p className="card-text">
             <span>Students:</span>
             {Object.entries(students).map(([ID, student]) => (
@@ -113,4 +124,4 @@ return (
           </>
   );
           }
-export default MessageCard;
+export default StudentProjectRequestCard;

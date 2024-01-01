@@ -10,7 +10,6 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 urlpatterns = [
     path('register/',UserRegister.as_view(),name='register'),
     path('sugg-projects/', SuggestProjectView.as_view(), name='suggest-projects'),
-    path('sugg-projects/<path:id>/', DeleteSuggProject.as_view(), name='delete-sugg-project'),
     path('departments/', DepartmentView.as_view(), name='departments'),
     path('projects/', ProjectsView.as_view(), name='projects'),
     path('requests/', RequestsView.as_view(), name='requests'),
@@ -29,6 +28,11 @@ urlpatterns = [
     path('myprojects/',MyProjects.as_view()),
     path('employee/',Employee.as_view()),
     path('add-user/',AddUser.as_view()),
+    path('supervisors/',SupervisorsNames.as_view()),
+    path('add-project/',AddProjectRequestView.as_view()),
+    path('students-projects-requests/',StudentsProjectsRequests.as_view()),
+    path('update-students-projects-requests/',Update_Students_Proejcts_Requests.as_view()),
+    path('students-projects-requests-to-supervisors/',Students_Projects_Request_To_Supervisor.as_view()),
     
     
     

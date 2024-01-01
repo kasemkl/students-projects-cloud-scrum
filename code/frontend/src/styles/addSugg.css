@@ -41,7 +41,7 @@
   }
   @media (min-width:1000px) {
     
-      .input-card,.range{
+      .input-card,.sugg>.range{
           width: 50% !important;
         }
     }

@@ -1,7 +1,8 @@
 # models.py
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin,Group
+
 
 class AppUserManager(BaseUserManager):
     def create_user(self, university_id, password=None, **extra_fields):
@@ -21,6 +22,12 @@ class AppUserManager(BaseUserManager):
         user.is_staff = True
         user.is_superuser = True
         user.save()
+        new_group1, created = Group.objects.get_or_create(name='manager')
+        new_group2, created = Group.objects.get_or_create(name='supervisor')
+        new_group3, created = Group.objects.get_or_create(name='student')
+        new_group4, created = Group.objects.get_or_create(name='employee')
+        user.groups.add(new_group1)
+        user.groups.add(new_group2)
         return user
 
 class Account(AbstractBaseUser, PermissionsMixin):

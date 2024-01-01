@@ -7,7 +7,38 @@ color:orange !important;
 }
 .info{
     color: #7d7b8a;
+    margin: 0;
 }
 .status{
     color: #7d7b8a !important;
+}
+#cart-total{
+    display: inline !important;
+    text-align: center;
+    color: #fff;
+    background-color: red;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    font-size: 11px;
+    position: absolute;
+    left: 25px;
+}
+.clear-notfications{
+    float: right;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    color: #6262eb;
+    margin-right: 20px;
+    display: flex;
+    align-items: center;
+}
+.delete-icon{
+    display: flex;
+    color: red;
+    font-size: 24px;
+}
+.clear-notfications:hover{
+    color: #8585cf !important;
 }

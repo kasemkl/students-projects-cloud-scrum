@@ -36,26 +36,7 @@ const Card = ({ formData, isApplied }) => {
     text: 'please wait a second...'
   });
   const [project_type,setProject_type]=useState('junior')
-  
-  // const handleDeleteClick = async () => {
-  //   // Display a confirmation dialog
-  //   const isConfirmed = window.confirm('Are you sure you want to delete this item?');
-  //   if (isConfirmed) {
-  //     try {
-  //       // Perform the delete action here using async/await
-  //       let response = await api.delete(`/sugg-projects/${id}/`);
 
-  //       // Log the response after the delete operation
-  //       console.log(response.data);
-
-  //       // Log a message indicating that the item is deleted
-  //       console.log('Item deleted!');
-  //     } catch (error) {
-  //       // Handle errors if the delete operation fails
-  //       console.error('Error deleting item:', error);
-  //     }
-  //   }
-  // };
   const handleNumberOfStudentsChange = (e) => {
     const value = parseInt(e.target.value, 10);
     setNumberOfStudents(value);
@@ -71,8 +52,6 @@ const Card = ({ formData, isApplied }) => {
   };
   
   const handleSubmit = async () => {
-    // Perform submit logic here, using the 'students' array
-    // ...
     setShowFields(false);
     const formData = {
       project_id: id,
@@ -153,12 +132,12 @@ const Card = ({ formData, isApplied }) => {
               <span>department:</span> {department}
             </p>
             <p className="card-text">
-              <span>supervisor:</span> {supervisor_name}
+              <span>supervisor:</span> Dr.{supervisor_name}
             </p>
           </div>
         </div>
         <div className="buttons apply-btn">
-          {!showFields && userInfo.type === 'student' && !isApplied && (
+          {!showFields && userInfo.groups.includes("student") && !isApplied && (
             <button
               className="btn btn-success"
               onClick={() => {
@@ -176,7 +155,7 @@ const Card = ({ formData, isApplied }) => {
        
         </div>
         {showFields && (
-          <div>
+          <div className='sugg'>
             <MDBRange
               label="Number of Students"
               defaultValue={1}

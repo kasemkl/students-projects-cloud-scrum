@@ -24,7 +24,6 @@ export  const UserInfoProvider=({children})=>{
       profile_photo:''
     })
 
-console.log('user',user)
     const [load,setLoad]=useState(true)
 
     useEffect(() => {
@@ -46,7 +45,6 @@ console.log('user',user)
         fetchData();
       }, [user]);
 
-      console.log(userInfo)
 
       const updateUserInfo= async(formData)=>{
                 try {
@@ -77,7 +75,6 @@ console.log('user',user)
 
             const fetchNotifications = async () => {
             try {
-              console.log(user)
                 const response = await api.get(`/notifications/`);
                 if (response.status === 200) {
               const rawData=response.data
@@ -87,7 +84,6 @@ console.log('user',user)
             }));
 
             dataArray.reverse()
-            console.log(dataArray.length)
             setNotifications(dataArray)
             if(dataArray.length === 0 ){
               setIsEmpty(true)
@@ -129,7 +125,8 @@ const Data={
     notifications:notifications,
     isEmpty:isEmpty,
     updateUserInfo:updateUserInfo,
-    setUserInfo:setUserInfo
+    setUserInfo:setUserInfo,
+    setNotifications:setNotifications
 }
 return (
     <UserInfoContext.Provider value={Data}>

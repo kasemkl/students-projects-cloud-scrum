@@ -70,7 +70,6 @@ const LoginForm = () => {
           <span class="text">
             Not a member?
             <Link to="/sign-up" class="text login-link">
-              {" "}
               Sign Up Now
             </Link>
           </span>

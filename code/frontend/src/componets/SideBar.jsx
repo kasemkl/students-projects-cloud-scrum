@@ -9,6 +9,7 @@ const SideBar = () => {
     let {user,logoutUser}=useContext(AuthContext)
     const {userInfo}=useContext(UserInfoContext)
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const {notifications}=useContext(UserInfoContext)
 
   const toggleSidebar = () => {
     setSidebarOpen(!isSidebarOpen);
@@ -33,7 +34,7 @@ const SideBar = () => {
           </Link>
           <span className="tooltip">Dashboard</span>
         </li>
-        {userInfo.type==='admin' ?
+        {userInfo.groups.includes("admin") ?
          <li>
          <Link to="add-user">
            <i className="bx bx-user-plus"></i>
@@ -41,8 +42,9 @@ const SideBar = () => {
          </Link>
          <span className="tooltip">Add User</span>
        </li>:
+        
         <>
-        {userInfo.type === "employee" ? (
+        {userInfo.groups.includes("employee") ? (
           <li>
             <Link to="employee">
               <i className="bx bxs-add-to-queue"></i>
@@ -50,17 +52,22 @@ const SideBar = () => {
             </Link>
             <span className="tooltip">Pending Projects</span>
           </li>
-        ) : (
+        ) 
+        
+        : 
+        
+        (
           <>
-            <li>
-              <Link to="/sugg-list">
-                <i className="bx bxs-book-add"></i>
-                <span className="links_name">Suggestion Projects</span>
-              </Link>
-              <span className="tooltip">Suggestion Projects</span>
-            </li>
-            {(userInfo.type === "supervisor" ||
-              userInfo.type === "manager") && (
+                <li>
+                  <Link to="/sugg-list">
+                    <i className="bx bxs-book-add"></i>
+                    <span className="links_name">Suggestion Projects</span>
+                  </Link>
+                  <span className="tooltip">Suggestion Projects</span>
+                </li>
+
+
+            {userInfo.groups.includes("supervisor") && (
               <li>
                 <Link to="/add-sugg">
                   <i className="bx bx-add-to-queue"></i>
@@ -69,24 +76,28 @@ const SideBar = () => {
                 <span className="tooltip">Add Suggestion </span>
               </li>
             )}
-            {userInfo.type === "student" ? (
-              <li>
-                <Link to="inbox">
-                  <i className="bx bx-message-alt-add"></i>
-                  <span className="links_name">Requests</span>
-                </Link>
-                <span className="tooltip">Requests</span>
-              </li>
-            ) : (
-              <li>
-                <Link to="supervisor-inbox">
-                  <i className="bx bx-message-alt-add"></i>
-                  <span className="links_name">Requests</span>
-                </Link>
-                <span className="tooltip">Requests</span>
-              </li>
-            )}
-            {userInfo.type !== "manager" && (
+
+
+                    {userInfo.groups.includes("student")? (
+                      <li>
+                        <Link to="inbox">
+                          <i className="bx bx-message-alt-add"></i>
+                          <span className="links_name">Requests</span>
+                        </Link>
+                        <span className="tooltip">Requests</span>
+                      </li>
+                    ) : (
+                      <li>
+                        <Link to="supervisor-inbox">
+                          <i className="bx bx-message-alt-add"></i>
+                          <span className="links_name">Requests</span>
+                        </Link>
+                        <span className="tooltip">Requests</span>
+                      </li>
+                    )}
+
+
+            {!userInfo.groups.includes("manager") && (
               <li>
                 <Link to="my-requests">
                   <i className="bx bxs-message-alt-edit"></i>
@@ -105,7 +116,10 @@ const SideBar = () => {
           </>
         )}
         *
-        {userInfo.type === "manager" && (
+
+
+
+        {userInfo.groups.includes("manager") && (
           <>
             <li>
               <Link to="manager-request-list">
@@ -116,14 +130,35 @@ const SideBar = () => {
             </li>
           </>
         )}
+
+
+
+
+
+
+
         <li>
           <Link to="notifications">
-            <i className="bx bxs-bell"></i>
+            <i className="bx bxs-bell">
+            </i>
+          {notifications.length>0&&<span id="cart-total">{notifications.length}</span>}
             <span className="links_name">Notifications</span>
           </Link>
           <span className="tooltip">Notifications</span>
         </li>
+
+
+        <li>
+          <Link to="add-project-request">
+          <i className='bx bxs-plus-circle'></i>
+            <span className="links_name">Add Project Request</span>
+          </Link>
+          <span className="tooltip">Add Project Request</span>
+        </li>
             </>}
+
+
+
         <li>
           <Link to="/settings">
             <i className="bx bx-cog"></i>
@@ -131,18 +166,22 @@ const SideBar = () => {
           </Link>
           <span className="tooltip">Setting</span>
         </li>
-        <li className="profile">
-          <div className="profile-details">
-            <img src={userInfo.profile_photo} alt="profileImg" />
-            <div className="name_job">
-              <div className="name">
-                {userInfo.first_name} {userInfo.last_name}
+
+
+            <li className="profile">
+              <div className="profile-details">
+                <img src={userInfo.profile_photo} alt="profileImg" />
+                <div className="name_job">
+                  <div className="name">
+                    {userInfo.first_name} {userInfo.last_name}
+                  </div>
+                  <div className="job">{userInfo.type}</div>
+                </div>
               </div>
-              <div className="job">{userInfo.type}</div>
-            </div>
-          </div>
-          <i className="bx bx-log-out" id="log_out" onClick={logoutUser}></i>
-        </li>
+              <i className="bx bx-log-out" id="log_out" onClick={logoutUser}></i>
+            </li>
+
+
       </ul>
     </div>
   );

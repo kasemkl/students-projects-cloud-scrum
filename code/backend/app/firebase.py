@@ -91,8 +91,8 @@ def Logging(data):
         ref.child(new_project_key).set(data)
         return data
       
-def addStudentRequest(data):
-    ref = db.reference('students_requests')
+def addStudentRequest(reference,data):
+    ref = db.reference(reference)
     new_project_key = ref.push().key
     ref.child(new_project_key).set(data)
     return data
@@ -103,6 +103,24 @@ def get_user_projects(reference, user_id):
     user_projects = {}
     if data :
       for project_id, project_data in data.items():
+          students_data = project_data.get("students", {})
+          if str(user_id) in students_data:
+            user_projects[project_id] = project_data
+                
+    return user_projects
+
+def get_student_projects(reference,reference2, user_id):
+    data = db.reference(reference).get()
+    data2 = db.reference(reference2).get()
+
+    user_projects = {}
+    if data :
+      for project_id, project_data in data.items():
+          students_data = project_data.get("students", {})
+          if str(user_id) in students_data:
+            user_projects[project_id] = project_data
+    if data2 :
+      for project_id, project_data in data2.items():
           students_data = project_data.get("students", {})
           if str(user_id) in students_data:
             user_projects[project_id] = project_data
@@ -131,3 +149,28 @@ def get_supervisor_projects(reference, user_id):
             user_projects[project_id] = project_data
                 
     return user_projects
+
+def get_supervisor_projects2(reference,reference2, user_id):
+    data = db.reference(reference).get()
+    data2 = db.reference(reference2).get()
+
+    user_projects = {}
+    if data :
+      for project_id, project_data in data.items():
+          supervisor = project_data.get('supervisor_id')
+          if supervisor ==user_id :
+            user_projects[project_id] = project_data
+    if data2 :
+      for project_id, project_data in data2.items():
+          supervisor = project_data.get('supervisor_id')
+          if supervisor ==user_id :
+            user_projects[project_id] = project_data
+                
+    return user_projects
+
+def deleteNotification(user):
+    ref = db.reference('notifications')
+    data = ref.get()
+    for key, value in data.items():
+        if value['receiver_id'] == user:
+            ref.child(key).delete()

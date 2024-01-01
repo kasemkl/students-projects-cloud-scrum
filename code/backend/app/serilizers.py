@@ -78,3 +78,9 @@ class AddUserSerializer(serializers.ModelSerializer):
             return user
         except Exception as e:
             raise ValidationError({'message': str(e)})
+        
+class SupervisorsNamesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Account
+        fields = ['university_id', 'first_name', 'last_name']

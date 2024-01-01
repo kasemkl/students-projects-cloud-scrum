@@ -11,29 +11,28 @@ const Employee = () => {
     const {render}=useContext(RenderContext)
     const [isEmpty,setIsEmpty]=useState()
     const api=useAxios()
+    const[reload,setReload]=useState(false)
 
     useEffect(() => {
         const fetchData = async () => {
           try {
             let response = await api.get("/employee/");
-        
             if (response.status === 200) {
-        
               // Check if response.data is an empty object
               console.log(response.data)
               const isEmptyObject = Object.keys(response.data).length === 0;
         
               if (isEmptyObject) {
                 setIsEmpty(true);
-              } else {
+              } else setIsEmpty(false)
                 const rawData = response.data;
                 const dataArray = Object.keys(rawData).map((key) => ({
                   id: key,
                   ...rawData[key],
                 }));
                 setData(dataArray);
-                setIsEmpty(false);
-              }
+                console.log('helloo')
+              
             }
           } catch (error) {
             // Handle errors
@@ -41,14 +40,14 @@ const Employee = () => {
           }
         };
         fetchData();
-      }, [render]);
+      }, [reload]);
   return (
     <div className='container'>
         <h1>Pending Projects</h1>
         {data.length>0?
           <div className="projects-list">
             {data.map((project) => (
-              <EmployeeCard key={project.id} formData={project} />
+              <EmployeeCard key={project.id} formData={project} reload={reload} setReload={setReload}/>
             ))}
           </div>
           :isEmpty?
