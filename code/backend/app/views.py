@@ -3,14 +3,14 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from .permissions import IsManager, IsSupervisor
+from .permissions import IsManager, IsSupervisor,IsCommittee,IsEmployee
 from .firebase import *
 from .validition import validateRequestsData
 from .serilizers import *  # Make sure to import your serializers
 from rest_framework.parsers import MultiPartParser, FormParser
 from datetime import datetime
 from django.contrib.auth.hashers import check_password
-
+from firebase_admin import storage
 from datetime import datetime
 import pytz
 
@@ -334,6 +334,11 @@ class ApplyProjectView(APIView):
                     return Response({'title': 'Application failed',
                                 'text': f'Student with ID {student} belong to another team \n please check ID and try again.'},
                                 status=status.HTTP_200_OK)
+                check_if_apply=check_if_apply_projects('students_projects_requests_to_supervisors',student)
+                if check_if_apply:
+                    return Response({'title': 'Application failed',
+                                'text': f'Student with ID {student} belong to another team \n please check ID and try again.'},
+                                status=status.HTTP_200_OK)    
                     
                 student_uni_data=University_students.objects.get(university_id=student)
                 
@@ -366,12 +371,14 @@ class ApplyProjectView(APIView):
                 students_hours[str(student)]=student_uni_data.number_of_hours
                 
                 students_obj[str(student)]['name'] = student_data.first_name + ' ' + student_data.last_name
-                if index == 0:
+                if index == 0 :
                     students_obj[str(student)]['status'] = 'sender'
-                    notification={'message':f'{request.user.first_name} your request send to team',
+                    if len(students) > 1:
+                        Logging({"action":f"user with university ID={request.user.university_id} send team request ",'date':date})
+                        notification={'message':f'{request.user.first_name} your request send to team',
                                         'receiver_id':int(student),
                                         'date':date}
-                    postData('notifications',notification)
+                        postData('notifications',notification)
                 else:
                     students_obj[str(student)]['status'] = 'pending'
                     notification={'message':f'{request.user.first_name} send you team request',
@@ -400,6 +407,7 @@ class ApplyProjectView(APIView):
                     
                 data['students']=students_obj
                 postData('requests_to_supervisors',data)
+                Logging({"action":f"user with university ID={request.user.university_id} send project request ",'date':date})
                 notification={'message':f'{request.user.first_name} sent you a request',
                                 'receiver_id':int(data['supervisor_id']),
                                 'date':date}
@@ -442,6 +450,12 @@ class Check_if_Apply_project(APIView):
         respone=check_if_apply_projects('projects',user)
         if respone:
             return Response({'applied':respone})
+        respone=check_if_apply_projects('students_projects_requests',user)
+        if respone:
+            return Response({'applied':respone})
+        respone=check_if_apply_projects('students_projects_requests_to_supervisors',user)
+        if respone:
+            return Response({'applied':respone})
         return Response({'applied':False})
 
 
@@ -456,6 +470,7 @@ class Update_Students_Requests(APIView):
             students[str(request.user.university_id)]['status']='accept'        
             data['students']=students
             update=editDataByID('students_requests',request_id,data)
+            Logging({"action":f"user with university ID={request.user.university_id} accept team request ",'date':date})
             all_accept=all(student_data.get("status") in ['accept', 'sender'] for student_data in students.values())
             
             if all_accept:
@@ -478,6 +493,7 @@ class Update_Students_Requests(APIView):
                                 status=status.HTTP_200_OK)
         elif response=='delete':
             dell=deleteData('students_requests',request_id)
+            Logging({"action":f"user with university ID={request.user.university_id} reject team request ",'date':date})
             for student in students:
                 notification={'message':f'{request.user.first_name} reject your request',
                                     'receiver_id':int(student),
@@ -503,6 +519,7 @@ class Request_To_Supervisor(APIView):
             
         if response=='delete':
             result=deleteData('requests_to_supervisors',request_id)
+            Logging({"action":f"user with university ID={request.user.university_id} reject project request",'date':date})
             for student in students:
                 notification={'message':f'Dr.{request.user.first_name} reject your request',
                                     'receiver_id':int(student),
@@ -526,9 +543,11 @@ class Request_To_Supervisor(APIView):
             project['students']=students
             project['project_type']=request_data.get('project_type')
             project['date']=current_date_time.strftime('%Y/%m/%d')
+            
             postData('employee',project)
             deleteData('requests_to_supervisors',request_id)
-            
+            Logging({"action":f"user with university ID={request.user.university_id} accept project request with title={project.get('title')}",'date':date})
+
             employee = Account.objects.filter(groups__name='employee')
             for emp in employee.values():
                 notification={'message':f' Dr.{request.user.first_name} send project to registe ',
@@ -582,6 +601,7 @@ class Employee(APIView):
                 students.append(int(id))
         if respone=='success':
             postData('projects',project)
+            Logging({"action":f"user with university ID={request.user.university_id} approve project with title={project.get('title')}",'date':date})
             if sugg_project_id:
                 deleteData('suggestion_projects',sugg_project_id)
             deleteData('employee',project_id)
@@ -595,6 +615,7 @@ class Employee(APIView):
                                 status=status.HTTP_200_OK)
         elif respone=='failed':
             deleteData('employee',project_id)
+            Logging({"action":f"user with university ID={request.user.university_id} failed registe project ",'date':date})
             for student in students:
                 notification={'message':f'Your project register failed please check your info with {request.user.first_name} {request.user.last_name}.',
                                     'receiver_id':int(student),
@@ -606,8 +627,7 @@ class Employee(APIView):
                 
 
 class AddUser(APIView):
-    # ...
-
+    permission_classes=[IsAdminUser]
     def post(self, request):
         password = request.data.get('password')
         confirmation_password = request.data.get('confirmation_password')
@@ -630,6 +650,9 @@ class AddUser(APIView):
                 try:
                     group = Group.objects.get(name=group_name)
                     instance.groups.add(group)
+                    if group_name=='manager':
+                        group = Group.objects.get(name='supervisor')
+                        instance.groups.add(group)
                 except Group.DoesNotExist:
                     # Handle the case where the group doesn't exist (optional)
                     return Response({'title': 'Failed Registration', 'text': f'Group "{group_name}" does not exist.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -655,7 +678,7 @@ class SupervisorsNames(APIView):
         serializer = SupervisorsNamesSerializer(supervisors, many=True)
         return Response(serializer.data)
     
-    
+##sprint 3 start
 class AddProjectRequestView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -689,6 +712,16 @@ class AddProjectRequestView(APIView):
                                 'text': f'Student with ID {student} belong to another team \n please check ID and try again.'},
                                 status=status.HTTP_200_OK)
                 check_if_apply=check_if_apply_projects('projects',student)
+                if check_if_apply:
+                    return Response({'title': 'Application failed',
+                                'text': f'Student with ID {student} belong to another team \n please check ID and try again.'},
+                                status=status.HTTP_200_OK)
+                check_if_apply=check_if_apply_projects('students_projects_requests',student)
+                if check_if_apply:
+                    return Response({'title': 'Application failed',
+                                'text': f'Student with ID {student} belong to another team \n please check ID and try again.'},
+                                status=status.HTTP_200_OK)
+                check_if_apply=check_if_apply_projects('students_projects_requests_to_supervisors',student)
                 if check_if_apply:
                     return Response({'title': 'Application failed',
                                 'text': f'Student with ID {student} belong to another team \n please check ID and try again.'},
@@ -727,10 +760,12 @@ class AddProjectRequestView(APIView):
                 students_obj[str(student)]['name'] = student_data.first_name + ' ' + student_data.last_name
                 if index == 0:
                     students_obj[str(student)]['status'] = 'sender'
-                    notification={'message':f'{request.user.first_name} your request send to team',
-                                        'receiver_id':int(student),
-                                        'date':date}
-                    postData('notifications',notification)
+                    if len(students) > 1:
+                        Logging({"action":f"user with university ID={request.user.university_id} send team request",'date':date})
+                        notification={'message':f'{request.user.first_name} your request send to team',
+                                            'receiver_id':int(student),
+                                            'date':date}
+                        postData('notifications',notification)
                 else:
                     students_obj[str(student)]['status'] = 'pending'
                     notification={'message':f'{request.user.first_name} send you team request',
@@ -759,6 +794,7 @@ class AddProjectRequestView(APIView):
                     
                 data['students']=students_obj
                 postData('students_projects_requests_to_supervisors',data)
+                Logging({"action":f"user with university ID={request.user.university_id} send project request",'date':date})
                 notification={'message':f'{request.user.first_name} sent you a project request',
                                 'receiver_id':int(data['supervisor_id']),
                                 'date':date}
@@ -783,6 +819,7 @@ class Update_Students_Proejcts_Requests(APIView):
             students[str(request.user.university_id)]['status']='accept'        
             data['students']=students
             update=editDataByID('students_projects_requests',request_id,data)
+            Logging({"action":f"user with university ID={request.user.university_id} accept team request",'date':date})
             all_accept=all(student_data.get("status") in ['accept', 'sender'] for student_data in students.values())
             
             if all_accept:
@@ -794,6 +831,7 @@ class Update_Students_Proejcts_Requests(APIView):
                     student_info['GPA'] = student_uni_data.GPA
                     
                 data['students']=students
+                Logging({"action":f"students with university ID={students} send project request",'date':date})
                 postData('students_projects_requests_to_supervisors',data)
                 deleteData('students_projects_requests',request_id)
                 notification={'message':f'{request.user.first_name} sent you a request',
@@ -831,6 +869,7 @@ class Students_Projects_Request_To_Supervisor(APIView):
             
         if response=='delete':
             result=deleteData('students_projects_requests_to_supervisors',request_id)
+            Logging({"action":f"user with university ID={request.user.university_id} delete project request",'date':date})
             for student in students:
                 notification={'message':f'Dr.{request.user.first_name} reject your request',
                                     'receiver_id':int(student),
@@ -851,7 +890,7 @@ class Students_Projects_Request_To_Supervisor(APIView):
             project['date']=current_date_time.strftime('%Y/%m/%d')
             postData('employee',project)
             deleteData('students_projects_requests_to_supervisors',request_id)
-            
+            Logging({"action":f"user with university ID={request.user.university_id} accept project with title={project.get('title')}",'date':date})
             employee = Account.objects.filter(groups__name='employee')
             for emp in employee.values():
                 notification={'message':f' Dr.{request.user.first_name} send project to registe ',
@@ -867,3 +906,48 @@ class Students_Projects_Request_To_Supervisor(APIView):
             return Response({'title': 'Application Approved',
                                 'text': 'Your response sent successfully and the project is approved.'},
                                 status=status.HTTP_200_OK)
+            
+
+class Advertismenet(APIView):
+    permission_classes=[IsAuthenticated]
+    def post(self,request):
+        if not request.user.groups.filter(name='committee').exists():
+            return Response({'detail': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
+
+        user=request.user.university_id
+        title=request.data.get('title')
+        file = request.FILES['file']
+        file_url=upload(file)
+        
+        postData('advertisements',{'title':title,'url':file_url,'date':date})
+        Logging({"action":f"user with university ID={request.user.university_id} added an advertisment",'date':date})
+        return Response({'title':'Advertismenet Added','text':'Advertisment was Added successfully.'},status=status.HTTP_200_OK)    
+    def get(self,request):
+        data=getData('advertisements')
+        return Response(data)
+    
+class DeleteAdvert(APIView):
+    permission_classes=[IsCommittee]
+    def post(self,request):
+        key=request.data.get('id')
+        file_name=request.data.get('file_name')
+        delete_file(file_name)
+        deleteData('advertisements',key)
+        Logging({"action":f"user with university ID={request.user.university_id} delete advertisment",'date':date})
+        return Response({'title':'Advertismenet Deleted','text':'Advertisment was deleted successfully.'},status=status.HTTP_200_OK)
+    
+class LoggingView(APIView):
+    permission_classes=[IsAdminUser]
+    def get(self,request):
+        data=getData('Logging')
+        return Response(data,status=status.HTTP_200_OK)
+    
+class CommitteeView(APIView):
+    permission_classes=[IsManager]
+    def post(self,request):
+        supervisor=request.data.get('supervisor_id')
+        supervisor_instance=Account.objects.get(university_id=supervisor)
+        if not supervisor_instance.groups.filter(name='committee').exists():
+            committee_group = Group.objects.get(name='committee')
+            supervisor_instance.groups.add(committee_group)
+        return Response({'title':'Supervisor Added','text':'supervisor added successfully'},status=status.HTTP_200_OK)

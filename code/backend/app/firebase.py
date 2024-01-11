@@ -1,6 +1,7 @@
 import firebase_admin
-from firebase_admin import credentials,db
+from firebase_admin import credentials,db,storage
 import os 
+from datetime import datetime, timedelta
 current_script_directory = os.path.dirname(os.path.abspath(__file__))
 
 # Path to your service account key JSON file
@@ -174,3 +175,27 @@ def deleteNotification(user):
     for key, value in data.items():
         if value['receiver_id'] == user:
             ref.child(key).delete()
+def upload(file):
+    bucket_name = 'spubase-83c34.appspot.com'  # Specify the correct bucket name
+    bucket = storage.bucket(bucket_name)
+    blob = bucket.blob(file.name)
+    blob.upload_from_file(file)
+
+    # Get the URL of the uploaded file
+
+# Set a very large expiration time, for example, 10 years into   the future
+    expiration_time = datetime.utcnow() + timedelta(days=365 * 10)
+
+    file_url = blob.generate_signed_url(expiration=expiration_time, method='GET')
+    return file_url
+
+def delete_file(file_path):
+    # Create a storage client
+    bucket_name = 'spubase-83c34.appspot.com'  # Specify the correct bucket name
+    client = storage.bucket(bucket_name)
+
+    # Specify the file path in the storage bucket
+    blob = client.blob(file_path)
+    
+    # Delete the file
+    blob.delete()

@@ -26,8 +26,9 @@ class AppUserManager(BaseUserManager):
         new_group2, created = Group.objects.get_or_create(name='supervisor')
         new_group3, created = Group.objects.get_or_create(name='student')
         new_group4, created = Group.objects.get_or_create(name='employee')
-        user.groups.add(new_group1)
-        user.groups.add(new_group2)
+        new_group5, created = Group.objects.get_or_create(name='admin')
+        new_group6, created = Group.objects.get_or_create(name='committee')
+        user.groups.add(new_group5)
         return user
 
 class Account(AbstractBaseUser, PermissionsMixin):

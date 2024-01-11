@@ -34,14 +34,33 @@ const SideBar = () => {
           </Link>
           <span className="tooltip">Dashboard</span>
         </li>
+
+        <li>
+          <Link to="/projects">
+          <i className='bx bx-book-bookmark'></i>
+            <span className="links_name">Projects</span>
+          </Link>
+          <span className="tooltip">Projects</span>
+        </li>
+
         {userInfo.groups.includes("admin") ?
+         <>
+         <li>
+         <Link to="Logging">
+         <i className='bx bx-food-menu'></i>
+           <span className="links_name">Logging </span>
+         </Link>
+         <span className="tooltip">Logging</span>
+       </li>
          <li>
          <Link to="add-user">
            <i className="bx bx-user-plus"></i>
            <span className="links_name">Add User </span>
          </Link>
          <span className="tooltip">Add User</span>
-       </li>:
+       </li>
+         </>
+       :
         
         <>
         {userInfo.groups.includes("employee") ? (
@@ -113,6 +132,14 @@ const SideBar = () => {
               </Link>
               <span className="tooltip">My projects</span>
             </li>
+        {userInfo.type==='student'&&
+        <li>
+          <Link to="add-project-request">
+          <i className='bx bxs-plus-circle'></i>
+            <span className="links_name">Add Project Request</span>
+          </Link>
+          <span className="tooltip">Add Project Request</span>
+        </li>}
           </>
         )}
         *
@@ -127,6 +154,13 @@ const SideBar = () => {
                 <span className="links_name">Suggestion Requests </span>
               </Link>
               <span className="tooltip">Suggetions Requests</span>
+            </li>
+            <li>
+              <Link to="add-committee">
+              <i className='bx bxs-user-plus'></i>
+                <span className="links_name">Add Committee </span>
+              </Link>
+              <span className="tooltip">Add Committee</span>
             </li>
           </>
         )}
@@ -148,13 +182,6 @@ const SideBar = () => {
         </li>
 
 
-        <li>
-          <Link to="add-project-request">
-          <i className='bx bxs-plus-circle'></i>
-            <span className="links_name">Add Project Request</span>
-          </Link>
-          <span className="tooltip">Add Project Request</span>
-        </li>
             </>}
 
 

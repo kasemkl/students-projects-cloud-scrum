@@ -42,3 +42,22 @@ color:orange !important;
 .clear-notfications:hover{
     color: #8585cf !important;
 }
+.passwordError{
+    margin: 0 0 0 20px;
+    font-size: 10px;
+    color: red;
+}
+.add-advert{
+    text-decoration: none;
+    background: #fff;
+    color: black;
+    padding: 5px;
+    border-radius: 50px;
+    float: right;
+    margin-bottom: 10px;
+    transition: 0.5s ease;
+}
+.add-advert:hover{
+    background-color: #6262eb;
+    color: #fff;
+}

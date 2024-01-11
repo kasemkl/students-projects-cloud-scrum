@@ -47,6 +47,16 @@ const SignUp = () => {
       reader.readAsDataURL(fileInput.files[0]);
     }
   };
+
+  const isStrong=()=>{
+    const hasLetter = /[a-zA-Z]/.test(formData.password);
+    const hasDigit = /\d/.test(formData.password);
+    return  formData.password.length > 7 && hasLetter && hasDigit;
+  }
+
+  const isMatch=()=>{
+  return formData.password&&formData.confirmation_password&&formData.password===formData.confirmation_password
+  }
   const handleRegister = async (e) => {
     e.preventDefault();
   
@@ -173,7 +183,7 @@ const SignUp = () => {
               )}
             </div>
           </div>
-
+          {!isStrong()&&formData.password&&<p className="passwordError">password not strong enough</p>}
           <div className="field">
             <label>Confirmation Password:</label>
             <input
@@ -185,7 +195,7 @@ const SignUp = () => {
             />
             <i className="bx bx-lock-alt"></i>
           </div>
-
+          {!isMatch()&&formData.confirmation_password&&<p className="passwordError">confirmation password not match password</p>}
           <div className="field btn">
             <button type="submit">Sign up</button>
           </div>

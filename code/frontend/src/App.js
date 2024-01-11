@@ -22,6 +22,10 @@ import Notifications from './pages/Notifications';
 import Employee from './pages/Employee';
 import AddUser from './pages/AddUser';
 import AddProjectRequest from './pages/AddProjectRequest';
+import AddAdverts from './componets/AddAdverts';
+import ProjectsList from './pages/ProjectsList';
+import Logging from './pages/Logging';
+import AddCommittee from './pages/AddCommittee';
 
 function App() {
   const location = useLocation();
@@ -30,14 +34,6 @@ function App() {
   const renderSideBar = (currentRoute !== '/sign-up' && currentRoute !== '/login')
   return (
     <div className="">
-      {/* <Nav />
-      <Routes>
-        <Route path='/' element={<Home><ProjectsList /></Home>} />
-        <Route path='/sugg-list' element={<MyComponent />} />
-        <Route path='/manager-request-list' element={<ManagerRequestList />} />
-        <Route path='/add-sugg' element={<Request />} />
-      </Routes> */}
-       
       <AuthProvider>
         <UserInfoProvider>
         <RenderProvider>
@@ -60,6 +56,10 @@ function App() {
           <Route path='/employee' element={<PrivateRoute element={<Employee/>}/>} /> 
           <Route path='/add-user' element={<PrivateRoute element={<AddUser/>}/>} /> 
           <Route path='/add-project-request' element={<PrivateRoute element={<AddProjectRequest/>}/>} /> 
+          <Route path='/add-advert' element={<PrivateRoute element={<AddAdverts/>}/>} /> 
+          <Route path='/projects' element={<PrivateRoute element={<ProjectsList/>}/>} /> 
+          <Route path='/logging' element={<PrivateRoute element={<Logging/>}/>} /> 
+          <Route path='/add-committee' element={<PrivateRoute element={<AddCommittee/>}/>} /> 
           
         </Routes>
         </div>

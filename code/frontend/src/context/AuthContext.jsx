@@ -49,11 +49,7 @@ export const AuthProvider = ({children}) => {
       history('/login');
     };
     
-    useEffect(() => {
-      console.log(user, authTokens, localStorage);
-    }, [user, authTokens]);
-    
-
+  
     let registerUser = async (formData) => {
       try {
           const formDataObj = new FormData();

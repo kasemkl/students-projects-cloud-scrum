@@ -33,6 +33,10 @@ urlpatterns = [
     path('students-projects-requests/',StudentsProjectsRequests.as_view()),
     path('update-students-projects-requests/',Update_Students_Proejcts_Requests.as_view()),
     path('students-projects-requests-to-supervisors/',Students_Projects_Request_To_Supervisor.as_view()),
+    path('advert/',Advertismenet.as_view()),
+    path('delete-advert/',DeleteAdvert.as_view()),
+    path('logging/',LoggingView.as_view()),
+    path('add-committee/',CommitteeView.as_view()),
     
     
     
