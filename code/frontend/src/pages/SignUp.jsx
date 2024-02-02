@@ -196,8 +196,8 @@ const SignUp = () => {
             <i className="bx bx-lock-alt"></i>
           </div>
           {!isMatch()&&formData.confirmation_password&&<p className="passwordError">confirmation password not match password</p>}
-          <div className="field btn">
-            <button type="submit">Sign up</button>
+          <div className="field btn sign">
+            <button type="submit" disabled={!isStrong()|| !isMatch()}>Sign up</button>
           </div>
           <div class="login-signup">
             <span class="text">

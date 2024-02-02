@@ -119,6 +119,15 @@ import {
     return Object.keys(formData).every((field) => formData[field] !== '');
   };
 
+ const isValidTitle = () => {
+  const title = formData.title;
+  const regex = /^[A-Za-z\u0600-\u06FF\s]+$/;
+  const isValid = regex.test(title) && !title.includes('؟');
+  return isValid;
+};
+
+  
+  
   const handleSubmit = async(e) => {
     // Make a POST request to the Django API endpoint
     e.preventDefault(); // Prevent the default form submission behavior
@@ -178,6 +187,10 @@ import {
             {touchedFields.title && formData.title === '' && (
               <span className="FieldError">Title is required</span>
             )}
+            { formData.title.length>0 && !isValidTitle() && (
+              <span className="FieldError">Title should be letters only</span>
+            )}
+
           </div>
   
           <div className='field'>
@@ -279,7 +292,7 @@ import {
       </div>
           </div>
           <div className='field'>
-            <button type="submit" className='btn btn-primary' disabled={!isValid()}>
+            <button type="submit" className='btn btn-primary' disabled={!isValid()|| !isValidTitle()}>
               Submit Request
             </button>
           </div>
